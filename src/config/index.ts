@@ -1,5 +1,5 @@
 const CONFIG = {
-    baseUrl:  process.env.BACKEND_URL ||'http://localhost:8000',
+    baseUrl:  process.env.BACKEND_URL ||'http://localhost:8000/api',
     auth: {
         login: '/auth/auth/login',
         signup: '/auth/auth/register',
