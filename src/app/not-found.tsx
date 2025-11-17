@@ -10,7 +10,6 @@ export default function ErrorPage({
 	error?: Error;
 	reset?: () => void;
 }) {
-	console.log('grs');
 
 	return (
 		<div className="min-h-screen flex items-center justify-center bg-gray-50">

@@ -12,6 +12,7 @@ import { cookies } from 'next/headers';
 import { Product } from '@/types/product';
 import { ProductsEmpty } from '@/components/custom/empty/ProductsEmpty';
 import { ProductsPagination } from './ProductsPagination';
+import { ShoppingCart } from 'lucide-react';
 
 type PriceCfgEntry = {
 	priceType: 'base' | 'additional' | 'discount';
@@ -180,11 +181,12 @@ function ProductsGrid({ products }: { products: Product[] }) {
 						</p>
 
 						<div className="mt-4 flex items-center justify-between">
-							<div className="text-primary font-semibold text-lg">
-								₹{getStartingPrice(p.priceConfiguration as unknown as PriceConfiguration).toFixed(0)}
+							<div className=" font-semibold text-base">
+								<span className='text-sm text-gray-700'>From</span> ₹{getStartingPrice(p.priceConfiguration as unknown as PriceConfiguration).toFixed(0)}
 							</div>
-							<Button className="rounded-md px-3 py-2 text-sm bg-primary text-white hover:bg-primary/90 transition cursor-pointer">
-								ADD
+							<Button className="rounded-md px-3 py-2 text-sm bg-primary text-white hover:bg-primary/90 transition cursor-pointer" size="sm">
+								<ShoppingCart />
+								Add to Cart
 							</Button>
 						</div>
 					</div>
