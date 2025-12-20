@@ -1,24 +1,24 @@
 const CONFIG = {
-    baseUrl:  process.env.BACKEND_URL ||'http://localhost:8000/api',
-    auth: {
-        login: '/auth/auth/login',
-        signup: '/auth/auth/register',
-        self: '/auth/auth/self',
-        logout: '/auth/auth/logout',
-        refresh: '/auth/auth/refresh',
-    },
-    tenants: {
-        url: '/auth/tenants',
-    },
-    categories: {
-        url: '/catalog/categories',
-        list: '/catalog/categories/list',
-    },
-    products: {
-        url: '/catalog/products',
-    },
-    toppings: {
-        url: '/catalog/toppings',
-    },
+	baseUrl: process.env.BACKEND_URL || 'http://localhost:8000/api',
+	auth: {
+		login: '/auth/auth/login',
+		signup: '/auth/auth/register',
+		self: '/auth/auth/self',
+		logout: '/auth/auth/logout',
+		refresh: '/auth/auth/refresh',
+	},
+	tenants: {
+		url: '/auth/tenants',
+	},
+	categories: {
+		url: '/catalog/categories',
+		list: '/catalog/categories/list',
+	},
+	products: {
+		url: '/catalog/products',
+	},
+	toppings: {
+		url: '/catalog/toppings',
+	},
 };
 export default CONFIG;

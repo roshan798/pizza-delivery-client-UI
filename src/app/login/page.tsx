@@ -8,7 +8,6 @@ export default async function LoginPage() {
 		const response = await fetch(`${CONFIG.baseUrl}${CONFIG.tenants.url}`);
 		const restaurants = await response.json();
 		console.log('Fetched restaurants:', restaurants);
-		
 	} catch (error) {
 		console.error('Error fetching tenants:', error);
 	}

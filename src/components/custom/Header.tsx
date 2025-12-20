@@ -1,4 +1,3 @@
-// components/layout/Header.tsx (Server)
 import Link from 'next/link';
 import Image from 'next/image';
 import Logo from '../../../public/Logo.svg';
@@ -6,18 +5,25 @@ import CONFIG from '@/config';
 import { cookies } from 'next/headers';
 import { Button } from '../ui/button';
 import { TenantSelect } from './TenantSelect';
+import CartIcon from './CartIcon';
 
 export default async function Header() {
 	const baseUrl = CONFIG.baseUrl.replace('localhost', '127.0.0.1');
-	const res = await fetch(baseUrl + CONFIG.tenants.url, { next: { revalidate: 3600, tags: ['tenants'] } });
-	const { tenants } = (await res.json()) as { tenants: { id: string; name: string }[] };
+	const res = await fetch(baseUrl + CONFIG.tenants.url, {
+		next: { revalidate: 3600, tags: ['tenants'] },
+	});
+	const { tenants } = (await res.json()) as {
+		tenants: { id: string; name: string }[];
+	};
 	const current = (await cookies()).get('tenantId')?.value || 'all';
 
 	return (
 		<header className="w-full bg-white border-b">
 			<div className="container mx-auto px-4 py-3 flex items-center justify-between">
 				<div className="flex items-center gap-4">
-					<Link href="/"><Image src={Logo} alt="Pizza App" /></Link>
+					<Link href="/">
+						<Image src={Logo} alt="Pizza App" />
+					</Link>
 					<div className="hidden sm:block">
 						<TenantSelect tenants={tenants} current={current} />
 					</div>
@@ -46,7 +52,8 @@ export default async function Header() {
 						</Link>
 					</nav>
 
-					<div>
+					<div className="flex items-center gap-3">
+						<CartIcon />
 						<Link href="/login">
 							<Button variant="default">Login</Button>
 						</Link>
@@ -56,5 +63,3 @@ export default async function Header() {
 		</header>
 	);
 }
-
-
