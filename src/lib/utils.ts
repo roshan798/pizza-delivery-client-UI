@@ -6,5 +6,5 @@ export function cn(...inputs: ClassValue[]) {
 }
 export function formatPrice(n: number) {
 	const whole = Number.isInteger(n) ? n.toString() : n.toFixed(2);
-	return `₹${whole}`;
+	return `${whole}`;
 }
