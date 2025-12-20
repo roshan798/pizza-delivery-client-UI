@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ShoppingCart } from 'lucide-react';
-import { ProductDialog } from './ProductDialog';
+import { ProductDialog } from './(productDialogue)/ProductDialog';
 import {
 	Tooltip,
 	TooltipProvider,
@@ -12,7 +12,6 @@ import {
 } from '@/components/ui/tooltip';
 import { Product } from '@/types/product';
 import { useAppSelector } from '@/lib/hooks';
-import CartButton from './CartButton';
 
 export function ProductQuickActions({
 	product,
