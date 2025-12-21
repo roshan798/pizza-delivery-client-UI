@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import { useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import {
 	Dialog,
@@ -20,11 +21,10 @@ import { Topping } from '@/types/types';
 import {
 	Cart,
 	addToCart,
-	incrementProductQuantity,
-	decrementProductQuantity,
+	makeSelectProductsByProductId,
 } from '@/lib/cart/cartSlices';
-import { useAppDispatch } from '@/lib/hooks';
-import CartButton from '../CartButton';
+import { useAppDispatch, useAppSelector } from '@/lib/hooks';
+import { useToast } from '@/components/ui/toast';
 import Toppings from './Toppings';
 import PriceBreakdown from './PriceBreakdown';
 
@@ -55,15 +55,15 @@ export function ProductDialog({
 	onOpenChange,
 	product,
 	imgSrc,
-	productInCart,
 }: {
 	open: boolean;
 	onOpenChange: (v: boolean) => void;
 	product: Product;
 	imgSrc: string;
-	productInCart: Cart | undefined;
 }) {
 	const dispatch = useAppDispatch();
+	const router = useRouter();
+	const { toast } = useToast();
 	const bases = useMemo(
 		() => parseBase(product.priceConfiguration),
 		[product.priceConfiguration]
@@ -85,35 +85,70 @@ export function ProductDialog({
 
 	// URL for toppings from product config
 	const toppingsUrl = CONFIG.baseUrl + CONFIG.toppings.url;
-	const handleAddonChange = (type?: string) => {
-		if (!productInCart) {
-			const productId = product._id;
-			const base = {
-				name: size,
-				price: basePrice,
-			};
-			const toppings = addons
-				.filter((t) => t.checked)
-				.map((t) => ({
-					id: t.id,
-					name: t.name,
-					price: t.price,
-				}));
-			const cartItem: Cart = {
-				productId,
-				quantity: 1,
-				base,
-				toppings,
-			};
-			// Call API or Server Action to add to cart
-			dispatch(addToCart(cartItem));
-		} else if (type === 'increment') {
-			dispatch(incrementProductQuantity(productInCart.productId));
-		} else {
-			dispatch(decrementProductQuantity(productInCart.productId));
+
+	// get allCombinations of addons on this products that are added in the cart
+	const selectProductsForThisProduct = useMemo(() => makeSelectProductsByProductId(), []);
+	const productsInCart = useAppSelector((state) => selectProductsForThisProduct(state, product._id));
+	const handleAddToCart = () => {
+		const productId = product._id;
+		const base = {
+			name: size,
+			price: basePrice,
+		};
+		const toppings = addons
+			.filter((t) => t.checked)
+			.map((t) => ({
+				id: t.id,
+				name: t.name,
+				price: t.price,
+			}));
+		const cartItem: Cart = {
+			productId,
+			quantity: 1,
+			base,
+			toppings,
+			key: '' // will be set later
+		};
+		// check same coposition is added or not is cart
+		const key = makeKey(cartItem);
+		// Check whether an identical composition already exists in cart
+		let duplicateFound = false;
+		for (const pInCart of productsInCart) {
+			if (pInCart.key === key) {
+				duplicateFound = true;
+				// Show an in-app toast with action to view cart
+				toast({
+					title: 'Item already in cart',
+					description: 'This exact item (same size and toppings) is already in your cart.',
+					actionText: 'View cart',
+					variant: 'warning',
+					onAction: () => {
+						router.push('/cart');
+						onOpenChange(false);
+					},
+				});
+				onOpenChange(false);
+				break;
+			}
+		}
+		if (duplicateFound) {
+			// Do not add a duplicate item
+			return;
 		}
 
-	};
+		if (!cartItem.key || cartItem.key === '') {
+			cartItem.key = key;
+		}
+		console.log("Final Cart Item :", cartItem)
+		// Call API or Server Action to add to cart
+		dispatch(addToCart(cartItem));
+		onOpenChange(false)
+
+	}
+	const makeKey = (cart: Cart) => {
+		const toppingIds = cart.toppings.map(t => t.id).sort().join(',');
+		return `${cart.productId}|${cart.base.name}|${toppingIds}`;
+	}
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
 			<DialogContent className="w-[96vw] max-h-screen max-w-md sm:max-w-2xl md:max-w-4xl lg:max-w-5xl p-0 overflow-hidden">
@@ -207,7 +242,6 @@ export function ProductDialog({
 							<PriceBreakdown
 								addonsPrice={addonsPrice}
 								basePrice={basePrice}
-								quantity={productInCart?.quantity}
 							/>
 							<div className="flex items-center gap-2">
 								<Button
@@ -218,10 +252,15 @@ export function ProductDialog({
 									Close
 								</Button>
 
-								<CartButton
+								<Button
+									onClick={handleAddToCart}
+								>
+									Add to
+								</Button>
+								{/* <CartButton
 									productInCart={productInCart}
 									handleAddonChange={handleAddonChange}
-								/>
+								/> */}
 							</div>
 						</div>
 					</div>
