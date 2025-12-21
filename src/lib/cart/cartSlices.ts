@@ -1,5 +1,6 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, createSelector } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
+import type { RootState } from '@/lib/store';
 
 export interface Cart {
 	productId: string;
@@ -13,6 +14,7 @@ export interface Cart {
 		price: number;
 	}[];
 	quantity: number;
+	key?: string;
 }
 type CartState = Cart[];
 
@@ -23,37 +25,33 @@ const cartSlice = createSlice({
 	initialState,
 	reducers: {
 		addToCart(state, action: PayloadAction<Cart>) {
-			const productId = action.payload.productId;
-			const existingItemIndex = state.findIndex(
-				(item) => item.productId === productId
-			);
-			if (existingItemIndex !== -1) {
-				state[existingItemIndex].quantity += action.payload.quantity;
-				return state;
-			}
+			console.log('Adding to cart:', action.payload); 
 			state.push(action.payload);
 		},
 		incrementProductQuantity(state, action: PayloadAction<string>) {
-			const productId = action.payload;
+			// i will be getting the key here
+			const key = action.payload;
 			const existingItem = state.find(
-				(item) => item.productId === productId
+				(item) => item.key === key
 			);
 			if (existingItem) {
 				existingItem.quantity += 1;
 			}
 		},
 		decrementProductQuantity(state, action: PayloadAction<string>) {
-			const productId = action.payload;
+						// i will be getting the key here
+
+			const key = action.payload;
 			const existingItem = state.find(
-				(item) => item.productId === productId
+				(item) => item.key === key
 			);
 			console.log(
-				'Decrementing product quantity for productId:',
-				productId,
+				'Decrementing product quantity for key:',
+				key,
 				existingItem
 			);
 			if (existingItem && existingItem.quantity === 1) {
-				return state.filter((item) => item.productId !== productId);
+				return state.filter((item) => item.key !== key);
 			}
 			if (existingItem && existingItem.quantity > 1) {
 				existingItem.quantity -= 1;
@@ -68,6 +66,17 @@ const cartSlice = createSlice({
 		},
 	},
 });
+
+// Basic selectors
+export const selectCart = (state: RootState) => state.cart;
+
+// Factory selector: returns a memoized selector instance for a given productId
+export const makeSelectProductsByProductId = () =>
+	createSelector(
+		[selectCart, (_: RootState, productId: string) => productId],
+		(cart, productId) => cart.filter((item) => item.productId === productId)
+	);
+
 
 export const {
 	addToCart,
