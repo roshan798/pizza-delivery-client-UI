@@ -192,12 +192,15 @@ export function ProductDialog({
 						)}
 
 						{/* Extra toppings */}
+						{
+							product.isToppingsAvailable &&
+							<Toppings
+								url={toppingsUrl}
+								addons={addons}
+								setAddons={setAddons}
+							/>
 
-						<Toppings
-							url={toppingsUrl}
-							addons={addons}
-							setAddons={setAddons}
-						/>
+						}
 
 						{/* Footer: total + actions */}
 						<div className="flex items-center justify-between pt-2 flex-wrap gap-4 border-t mt-4">

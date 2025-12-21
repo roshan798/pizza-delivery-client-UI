@@ -54,6 +54,7 @@ export interface Product {
 	isPublished: boolean;
 	createdAt: Date;
 	updatedAt: Date;
+	isToppingsAvailable: boolean;
 }
 
 export type PriceCfgEntry = {
