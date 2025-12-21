@@ -13,6 +13,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { useDebouncedCallback } from 'use-debounce';
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 
 type Props = {
 	categories: { id: string; name: string }[];
@@ -146,7 +147,9 @@ export default function ProductsHeader({
 					</SelectContent>
 				</Select>
 
-				<Button>View Cart</Button>
+				<Button>
+				<Link href="/cart">View Cart</Link>
+				</Button>
 			</div>
 		</div>
 	);

@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { ShoppingCart } from 'lucide-react';
 import { ProductDialog } from './(productDialogue)/ProductDialog';
 import {
 	Tooltip,
@@ -31,25 +30,25 @@ export function ProductQuickActions({
 				<Tooltip>
 					<TooltipTrigger asChild>
 						<Button
-							size="icon"
-							className="md:size-auto md:px-3 md:py-2 rounded-md bg-primary text-white hover:bg-primary/90 transition [&_svg]:size-5"
-							aria-label="Add to Cart"
+							size="sm"
+							variant="outline"
+							className="rounded-full text-primary border-primary/50 hover:text-primary"
+							aria-label="Choose"
 							onClick={() => setOpen(true)}
 						>
-							<ShoppingCart className="shrink-0" />
+							{/* <Settings className="shrink-0" /> */}
 							<span className="hidden md:inline ml-2">
-								Add to Cart
+								Choose
 							</span>
 						</Button>
-						{/* <CartButton productInCart={productInCart} handleAddonChange={() => {
-                            
-                        }}/> */}
 					</TooltipTrigger>
 					<TooltipContent side="top" className="md:hidden">
-						<p>Add to Cart</p>
+						<p>Choose</p>
 					</TooltipContent>
 				</Tooltip>
 			</TooltipProvider>
+
+
 
 			<ProductDialog
 				open={open}
