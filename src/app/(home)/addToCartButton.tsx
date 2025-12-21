@@ -55,9 +55,6 @@ export function AddToCartButton({ product }: { product: Product }) {
 						</DialogDescription>
 					</DialogHeader>
 
-					{/* Put your size/add-ons UI here, e.g., RadioGroup + Checkbox */}
-					{/* ... */}
-
 					<DialogFooter>
 						<Button onClick={() => setOpen(false)}>Close</Button>
 						<Button className="bg-primary text-white hover:bg-primary/90">
