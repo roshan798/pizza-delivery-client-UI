@@ -37,7 +37,7 @@ export function ProductQuickActions({
 							onClick={() => setOpen(true)}
 						>
 							{/* <Settings className="shrink-0" /> */}
-							<span className="hidden md:inline ml-2">
+							<span className="ml-2">
 								Choose
 							</span>
 						</Button>
