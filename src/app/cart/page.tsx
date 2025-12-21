@@ -103,14 +103,14 @@ const CartPage = () => {
 
                                 return (
                                     <li
-                                        key={item.productId}
+                                        key={index}
                                         className="flex items-start justify-between gap-4 border-b pb-4 last:border-b-0"
                                     >
                                         <div className="flex-1">
                                             <div className="flex items-center justify-between gap-2">
                                                 <div>
                                                     <h3 className="text-sm font-semibold">
-                                                        {item.productId} -
+                                                        {item.key} -
                                                         {item.base.name}
                                                     </h3>
                                                     <p className="text-xs text-muted-foreground">
@@ -147,7 +147,7 @@ const CartPage = () => {
                                                         className="h-8 w-8"
                                                         onClick={() =>
                                                             dispatch(
-                                                                decrementProductQuantity(item.productId)
+                                                                decrementProductQuantity(item.key!)
                                                             )
                                                         }
                                                     >
@@ -162,7 +162,7 @@ const CartPage = () => {
                                                         className="h-8 w-8"
                                                         onClick={() =>
                                                             dispatch(
-                                                                incrementProductQuantity(item.productId)
+                                                                incrementProductQuantity(item.key!)
                                                             )
                                                         }
                                                     >

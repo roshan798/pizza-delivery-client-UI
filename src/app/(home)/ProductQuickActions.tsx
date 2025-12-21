@@ -10,7 +10,6 @@ import {
 	TooltipContent,
 } from '@/components/ui/tooltip';
 import { Product } from '@/types/product';
-import { useAppSelector } from '@/lib/hooks';
 
 export function ProductQuickActions({
 	product,
@@ -20,9 +19,6 @@ export function ProductQuickActions({
 	imgSrc: string;
 }) {
 	const [open, setOpen] = useState(false);
-	const productInCart = useAppSelector((state) => {
-		return state.cart.find((item) => item.productId === product._id);
-	});
 
 	return (
 		<>
@@ -55,7 +51,6 @@ export function ProductQuickActions({
 				onOpenChange={setOpen}
 				product={product}
 				imgSrc={imgSrc}
-				productInCart={productInCart}
 			/>
 		</>
 	);
