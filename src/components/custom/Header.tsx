@@ -1,11 +1,12 @@
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import Logo from '../../../public/Logo.svg';
 import CONFIG from '@/config';
 import { cookies } from 'next/headers';
 import { Button } from '../ui/button';
 import { TenantSelect } from './TenantSelect';
-import CartIcon from './CartIcon';
+import ClientCartIconWrapper from './ClientCartIconWrapper'; // Import the new client wrapper
 
 export default async function Header() {
 	const baseUrl = CONFIG.baseUrl.replace('localhost', '127.0.0.1');
@@ -53,7 +54,7 @@ export default async function Header() {
 					</nav>
 
 					<div className="flex items-center gap-3">
-						<CartIcon />
+						<ClientCartIconWrapper /> {/* Use the client wrapper here */}
 						<Link href="/login">
 							<Button variant="default">Login</Button>
 						</Link>

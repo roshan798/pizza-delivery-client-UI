@@ -139,10 +139,19 @@ export function ProductDialog({
 		if (!cartItem.key || cartItem.key === '') {
 			cartItem.key = key;
 		}
-		console.log("Final Cart Item :", cartItem)
 		// Call API or Server Action to add to cart
 		dispatch(addToCart(cartItem));
 		onOpenChange(false)
+		toast({
+			title: 'Item added to cart',
+			description: '',
+			actionText: 'View cart',
+			variant: 'success',
+			onAction: () => {
+				router.push('/cart');
+				onOpenChange(false);
+			},
+		});
 
 	}
 	const makeKey = (cart: Cart) => {
@@ -255,12 +264,8 @@ export function ProductDialog({
 								<Button
 									onClick={handleAddToCart}
 								>
-									Add to
+									Add to Cart
 								</Button>
-								{/* <CartButton
-									productInCart={productInCart}
-									handleAddonChange={handleAddonChange}
-								/> */}
 							</div>
 						</div>
 					</div>

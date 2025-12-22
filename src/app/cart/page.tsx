@@ -4,18 +4,42 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { clearCart, decrementProductQuantity, incrementProductQuantity, removeFromCart } from "@/lib/cart/cartSlices";
+import { clearCart, decrementProductQuantity, incrementProductQuantity, removeFromCart, setCart } from "@/lib/cart/cartSlices";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { formatPrice } from "@/lib/utils";
-import { Separator } from "@radix-ui/react-select";
 
 
 import { Trash2, Minus, Plus, ShoppingBag } from "lucide-react";
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { loadState } from "@/lib/cart/cartSlices"; // Import loadState from cartSlices
+import { Separator } from "@radix-ui/react-select";
 
 const CartPage = () => {
     const cart = useAppSelector((state) => state.cart);
     const dispatch = useAppDispatch();
+    const [isLoadedFromLocalStorage, setIsLoadedFromLocalStorage] = useState(false);
+
+    useEffect(() => {
+        // This effect runs only on the client side after hydration
+        const storedCart = loadState();
+        if (storedCart.length > 0) {
+            dispatch(setCart(storedCart));
+        }
+        setIsLoadedFromLocalStorage(true);
+    }, [dispatch]);
+
+    // Show loading state until cart data is loaded from localStorage
+    if (!isLoadedFromLocalStorage) {
+        return (
+            <div className="min-h-[60vh] grid place-items-center">
+                <div className="flex flex-col items-center gap-4">
+                    <div className="h-10 w-10 rounded-full border-4 border-gray-200 border-t-primary animate-spin" />
+                    <p className="text-sm text-gray-600">Loading your cart...</p>
+                </div>
+            </div>
+        );
+    }
 
     const itemsTotal = cart.reduce(
         (sum, item) =>
@@ -50,7 +74,7 @@ const CartPage = () => {
     }
 
     return (
-        <div className="mx-auto flex min-h-[70vh] max-w-6xl flex-col gap-6 px-4 py-6 lg:flex-row">
+        <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-6 lg:flex-row">
             {/* Left: items */}
             <Card className="flex-1">
                 <CardHeader className="flex flex-row items-center justify-between">
@@ -88,10 +112,10 @@ const CartPage = () => {
                     </AlertDialog>
                 </CardHeader>
 
-                <Separator />
+                <Separator className="my-4" />
 
                 <CardContent className="p-0">
-                    <ScrollArea className="max-h-[480px] px-4 py-2">
+                    <ScrollArea className=" px-4 py-2">
                         <ul className="space-y-4">
                             {cart.map((item, index) => {
                                 const toppingsTotal = item.toppings.reduce(
@@ -216,7 +240,7 @@ const CartPage = () => {
                         </span>
                     </div>
 
-                    <Separator />
+                    <Separator className="my-4" />
 
                     <div className="flex items-center justify-between text-base">
                         <span className="font-semibold">Total to pay</span>
