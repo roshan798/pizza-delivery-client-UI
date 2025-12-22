@@ -4,6 +4,8 @@ import type { RootState } from '@/lib/store';
 
 export interface Cart {
 	productId: string;
+	productName: string;
+	productImg?: string;
 	base: {
 		name: string;
 		price: number;
@@ -102,6 +104,7 @@ const cartSlice = createSlice({
 			state.splice(action.payload, 1);
             saveState(state); // Save state after modification
 		},
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		clearCart(state) {
 			const newState: CartState = [];
             saveState(newState); // Save the empty state

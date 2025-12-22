@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import Logo from '../../../public/Logo.svg';
 import CONFIG from '@/config';

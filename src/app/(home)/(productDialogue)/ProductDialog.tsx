@@ -91,6 +91,8 @@ export function ProductDialog({
 	const productsInCart = useAppSelector((state) => selectProductsForThisProduct(state, product._id));
 	const handleAddToCart = () => {
 		const productId = product._id;
+		const productName = product.name;
+		const productImg = imgSrc;
 		const base = {
 			name: size,
 			price: basePrice,
@@ -104,10 +106,12 @@ export function ProductDialog({
 			}));
 		const cartItem: Cart = {
 			productId,
+			productName,
+			productImg,
 			quantity: 1,
 			base,
 			toppings,
-			key: '' // will be set later
+			key: '' 
 		};
 		// check same coposition is added or not is cart
 		const key = makeKey(cartItem);
