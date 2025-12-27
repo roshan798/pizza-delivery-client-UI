@@ -15,7 +15,7 @@ interface CartSummaryProps {
 
 export function CartSummary({ itemsTotal, delivery, tax, grandTotal }: CartSummaryProps) {
     return (
-        <Card className="w-full max-w-sm self-start">
+        <Card className="w-full lg:max-w-sm self-start">
             <CardHeader>
                 <CardTitle>Order Summary</CardTitle>
                 <CardDescription>Review your order before checkout.</CardDescription>

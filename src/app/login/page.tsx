@@ -1,16 +1,29 @@
+'use client';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import CONFIG from '@/config';
+import { loginUser, LoginState } from '../actions/auth'; // Import LoginState
+import { useEffect, useActionState } from 'react';
+import LoginButton from './components/LoginButton';
+import { useToast } from '@/components/ui/toast';
 
-export default async function LoginPage() {
-	try {
-		const response = await fetch(`${CONFIG.baseUrl}${CONFIG.tenants.url}`);
-		const restaurants = await response.json();
-		console.log('Fetched restaurants:', restaurants);
-	} catch (error) {
-		console.error('Error fetching tenants:', error);
+export default function LoginPage() {
+	const initialState: LoginState = { message: '', success: false };
+	const [state, formAction] = useActionState(loginUser, initialState);
+	console.log('Current state:', state);
+	const { toast } = useToast();
+	if (state.success && window) {
+		window.location.href = '/';
 	}
+	useEffect(() => {
+		if (state.message) {
+			toast({
+				title: state.success ? 'Success' : 'Login Failed',
+				description: state.message,
+				variant: state.success ? 'success' : 'error', // Use 'default' for success, 'error' for errors
+			});
+		}
+	}, [state.message, state.success, state.errors, toast]);
+
 	return (
 		<div className="min-h-screen flex items-center justify-center bg-gray-50 py-12">
 			<div className="w-full max-w-md bg-white rounded-lg shadow p-8 ">
@@ -22,19 +35,23 @@ export default async function LoginPage() {
 						Enter your email below to login to your account
 					</span>
 				</div>
-				<div className="space-y-4">
+				<form action={formAction} className="space-y-4">
 					<div>
 						<label className="block text-sm font-medium mb-1">
 							Email
 						</label>
-						<Input placeholder="john@example.com" />
+						<Input autoComplete='email' name="email" type="email" placeholder="john@example.com"
+							hasError={!!state.errors?.email}
+							errorMessage={state.errors?.email} />
 					</div>
-
 					<div>
 						<label className="block text-sm font-medium mb-1">
 							Password
 						</label>
-						<Input type="password" placeholder="Your password" />
+						<Input autoComplete='current-password' name='password' type="password" placeholder="Your password"
+							hasError={!!state.errors?.password}
+							errorMessage={state.errors?.password}
+						/>
 					</div>
 
 					<div className="flex items-center justify-between">
@@ -53,15 +70,14 @@ export default async function LoginPage() {
 						</Link>
 					</div>
 
-					<Button className="w-full cursor-pointer">Sign in</Button>
-
+					<LoginButton />
 					<p className="text-sm text-center">
 						Don&apos;t have an account?{' '}
 						<Link href="/signup" className="text-primary">
 							Sign up
 						</Link>
 					</p>
-				</div>
+				</form>
 			</div>
 		</div>
 	);

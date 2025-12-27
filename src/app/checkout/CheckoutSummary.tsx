@@ -19,7 +19,7 @@ export function CheckoutSummary(props: CheckoutSummaryProps) {
     const { itemsTotal, delivery, tax, discount, grandTotal, onPlaceOrder } = props;
 
     return (
-        <Card className="w-full max-w-sm self-start">
+        <Card className="w-full lg:max-w-sm self-start">
             <CardHeader>
                 <CardTitle>Order Summary</CardTitle>
                 <CardDescription>Review your order before placing it.</CardDescription>
