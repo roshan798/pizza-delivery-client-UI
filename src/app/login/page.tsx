@@ -2,28 +2,12 @@
 import { Input } from '@/components/ui/input';
 import Link from 'next/link';
 import { loginUser, LoginState } from '../actions/auth'; // Import LoginState
-import { useEffect, useActionState } from 'react';
 import LoginButton from './components/LoginButton';
-import { useToast } from '@/components/ui/toast';
+import { useActionState } from 'react';
 
 export default function LoginPage() {
 	const initialState: LoginState = { message: '', success: false };
 	const [state, formAction] = useActionState(loginUser, initialState);
-	console.log('Current state:', state);
-	const { toast } = useToast();
-	if (state.success && window) {
-		window.location.href = '/';
-	}
-	useEffect(() => {
-		if (state.message) {
-			toast({
-				title: state.success ? 'Success' : 'Login Failed',
-				description: state.message,
-				variant: state.success ? 'success' : 'error', // Use 'default' for success, 'error' for errors
-			});
-		}
-	}, [state.message, state.success, state.errors, toast]);
-
 	return (
 		<div className="min-h-screen flex items-center justify-center bg-gray-50 py-12">
 			<div className="w-full max-w-md bg-white rounded-lg shadow p-8 ">

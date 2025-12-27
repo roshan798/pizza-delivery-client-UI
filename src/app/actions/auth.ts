@@ -3,6 +3,7 @@
 import CONFIG from "@/config";
 import { mapServerFormErrors } from "@/lib/utils";
 import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
 import setCookie from 'set-cookie-parser';
 // Define the state interface for login actions
 export interface LoginState {
@@ -16,12 +17,12 @@ export interface SignUpState {
     success: boolean;
     errors?: Record<string, string>;
 }
+export interface LogoutState {
+    message: string;
+    success: boolean;
+    errors?: Record<string, string>;
+}
 
-/**
- * Parses raw 'Set-Cookie' header string(s) and returns an array of parsed cookie objects.
- * @param rawCookies The raw 'Set-Cookie' header string, which might contain multiple directives.
- * @returns An array of parsed cookie objects.
- */
 function parseCookies(rawCookies: string): setCookie.Cookie[] {
     if (!rawCookies) {
         return [];
@@ -29,13 +30,6 @@ function parseCookies(rawCookies: string): setCookie.Cookie[] {
     const cookieHeaderArray = setCookie.splitCookiesString(rawCookies);
     return setCookie.parse(cookieHeaderArray);
 }
-
-/**
- * Parses the 'Set-Cookie' header and sets the cookies in the Next.js environment.
- * @param setCookieHeader The raw 'Set-Cookie' header string.
- * @param actionName The name of the action (e.g., 'login', 'signup') for logging purposes.
- * @param excludeCookies An optional array of cookie names to exclude from being set.
- */
 
 async function setAuthCookies(setCookieHeader: string | null, actionName: string, excludeCookies: string[] = []): Promise<void> {
     if (setCookieHeader) {
@@ -80,11 +74,10 @@ export async function loginUser(prevState: LoginState, formData: FormData): Prom
     const setCookieHeader = res.headers.get('set-cookie'); // Get cookies from headers
 
     await setAuthCookies(setCookieHeader, 'login');
-    return { success: true, message: 'Login successful!' };
+    redirect('/');
 }
 
 
-//
 export async function createUser(prevState: SignUpState, formData: FormData): Promise<SignUpState> {
     const firstName = formData.get('firstName');
     const lastName = formData.get('lastName');
@@ -104,10 +97,42 @@ export async function createUser(prevState: SignUpState, formData: FormData): Pr
     if (!res.ok) {
         const errors = mapServerFormErrors(data);
 
-        return { success: false, message: 'Signup failed.',errors };
+        return { success: false, message: 'Signup failed.', errors };
     }
     const setCookieHeader = res.headers.get('set-cookie');
 
     await setAuthCookies(setCookieHeader, 'signup');
-    return { success: true, message: 'Signup successful!' };
+    redirect('/');
+}
+
+export async function logoutUser(): Promise<LogoutState> {
+    const clientCookies = await cookies();
+    const accessToken = clientCookies.get("accessToken")?.value;
+    const refreshToken = clientCookies.get("refreshToken")?.value;
+
+    const store = await cookies();
+    store.delete('accessToken');
+    store.delete('refreshToken');
+
+    try {
+        const res = await fetch(CONFIG.baseUrl + CONFIG.auth.logout, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': accessToken ? `Bearer ${accessToken}` : '',
+                'cookie' : refreshToken ? `refreshToken=${refreshToken}` : '',
+            },
+        });
+
+        if (!res.ok) {
+            const data = await res.json();
+            console.error('Server-side logout failed:', data);
+            return { success: false, message: data.message || 'Logout failed on the server.' };
+        }
+
+        redirect('/');
+    } catch (error) {
+        console.error('Network or unexpected error during logout:', error);
+        return { success: false, message: 'An unexpected error occurred during logout.' };
+    }
 }

@@ -6,6 +6,8 @@ import { cookies } from 'next/headers';
 import { Button } from '../ui/button';
 import { TenantSelect } from './TenantSelect';
 import ClientCartIconWrapper from './ClientCartIconWrapper'; // Import the new client wrapper
+import { getSession } from '@/lib/session';
+import LogoutButton from './LogoutButton'; // Import the new LogoutButton client component
 
 export default async function Header() {
 	const baseUrl = CONFIG.baseUrl.replace('localhost', '127.0.0.1');
@@ -16,7 +18,7 @@ export default async function Header() {
 		tenants: { id: string; name: string }[];
 	};
 	const current = (await cookies()).get('tenantId')?.value || 'all';
-
+	const session = await getSession();
 	return (
 		<header className="w-full bg-white border-b">
 			<div className="container mx-auto px-4 py-3 flex items-center justify-between">
@@ -52,12 +54,23 @@ export default async function Header() {
 						</Link>
 					</nav>
 
+					<ClientCartIconWrapper /> {/* Use the client wrapper here */}
+
 					<div className="flex items-center gap-3">
-						<ClientCartIconWrapper /> {/* Use the client wrapper here */}
-						<Link href="/login">
-							<Button variant="default">Login</Button>
-						</Link>
+
 					</div>
+					{
+						session ?
+							<LogoutButton />
+							:
+							<Link href="/login">
+								<Button
+									variant="default"
+								>Login</Button> {/* Corrected: Login button should not call handleLogout */}
+							</Link>
+
+					}
+
 				</div>
 			</div>
 		</header>

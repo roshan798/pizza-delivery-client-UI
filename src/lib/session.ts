@@ -2,10 +2,26 @@ import CONFIG from "@/config";
 import { cookies } from "next/headers";
 
 export async function getSession() {
-    return await getSelf();
+    return await getSelf(); //
+}
+interface User {
+    id: number;
+    firstName: string;
+    lastName: string;
+    email: string;
+    role: 'customer';
+    createdAt: string; // ISO 8601 date string
+    updatedAt: string; // ISO 8601 date string
 }
 
-async function getSelf() {
+interface SessionResponse {
+    success: boolean;
+    user: User;
+}
+
+
+
+async function getSelf(): Promise<SessionResponse | null> {
     // Implementation to get the current user session
     const clientCookies = await cookies()
     const accessToken = clientCookies.get("accessToken")?.value;
@@ -20,7 +36,7 @@ async function getSelf() {
     if (!res.ok) {
         return null;
     }
-    const data = await res.json();
+    const data: SessionResponse = await res.json();
     return data;
 
 }

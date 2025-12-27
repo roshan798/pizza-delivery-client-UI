@@ -2,24 +2,13 @@
 import { Input } from '@/components/ui/input';
 import Link from 'next/link';
 import { createUser, SignUpState } from '../actions/auth'; // Import SignUpState
-import { useEffect, useActionState } from 'react';
+import { useActionState } from 'react';
 import SignupButton from './components/SignupButton';
-import { useToast } from '@/components/ui/toast'; // Assuming this is the correct path for useToast
 
 export default function SignupPage() {
 	const initialState: SignUpState = { message: '', success: false };
 	const [state, formAction] = useActionState(createUser, initialState);
-	const { toast } = useToast();
 
-	useEffect(() => {
-		if ((state.success && state.message) || state.errors && state?.errors['genaral'] !== undefined) {
-			toast({
-				title: state.success ? 'Success' : 'Signup Failed',
-				description: state.message,
-				variant: state.success ? 'success' : 'error', // Use 'success' for success, 'error' for errors
-			});
-		}
-	}, [state.message, state.success, state.errors, toast]);
 
 	return (
 		<div className="min-h-screen flex items-center justify-center bg-gray-50 py-12">
