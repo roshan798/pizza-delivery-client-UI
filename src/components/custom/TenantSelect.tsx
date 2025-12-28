@@ -38,7 +38,7 @@ export function TenantSelect({
 			</SelectTrigger>
 			<SelectContent>
 				<SelectItem value="all">All</SelectItem>
-				{tenants.map((t) => (
+				{tenants && tenants.map((t) => (
 					<SelectItem key={t.id} value={t.id.toString()}>
 						{t.name}
 					</SelectItem>

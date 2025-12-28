@@ -13,9 +13,9 @@ import ProductsGrid from './ProductsGrid';
 import { SortBy, SortOrder } from '@/types/product';
 
 export default async function HomePage({
-	searchParams,
+	searchParamsProp,
 }: {
-	searchParams?: Record<string, string | string[] | undefined>;
+	searchParamsProp?: Promise<Record<string, string | string[] | undefined>>;
 }) {
 	const cookieStore = await cookies();
 	const tenantId = cookieStore.get('tenantId')?.value || undefined;
@@ -27,6 +27,7 @@ export default async function HomePage({
 			next: { revalidate: 3600000 },
 		}
 	);
+	const searchParams = await searchParamsProp ?? {};
 	const categories =
 		(await categoryListResponse.json()) as categoryListResponse;
 
@@ -36,12 +37,12 @@ export default async function HomePage({
 			: undefined;
 	const sortBy =
 		typeof searchParams?.sortBy === 'string' &&
-		(['createdAt', 'name'] as const).includes(searchParams.sortBy as SortBy)
+			(['createdAt', 'name'] as const).includes(searchParams.sortBy as SortBy)
 			? (searchParams.sortBy as SortBy)
 			: undefined;
 	const order =
 		typeof searchParams?.order === 'string' &&
-		(['asc', 'desc'] as const).includes(searchParams.order as SortOrder)
+			(['asc', 'desc'] as const).includes(searchParams.order as SortOrder)
 			? (searchParams.order as SortOrder)
 			: undefined;
 	const q =
@@ -57,7 +58,7 @@ export default async function HomePage({
 
 	const limit =
 		typeof searchParams?.limit === 'string' &&
-		Number(searchParams.limit) > 0
+			Number(searchParams.limit) > 0
 			? Math.min(48, Number(searchParams.limit))
 			: 12;
 

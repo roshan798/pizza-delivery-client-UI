@@ -28,7 +28,7 @@ const ProductCard = ({ product: p }: { product: Product }) => {
 			>
 				<div className="p-4">
 					<div className="relative mx-auto rounded-md overflow-hidden bg-gray-50">
-						<div className="aspect-[1/1] w-full">
+						<div className="aspect-[1/1] w-full relative">
 							<Image
 								src={imgSrc}
 								alt={p.name}

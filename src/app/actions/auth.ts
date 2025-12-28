@@ -31,7 +31,7 @@ function parseCookies(rawCookies: string): setCookie.Cookie[] {
     return setCookie.parse(cookieHeaderArray);
 }
 
-async function setAuthCookies(setCookieHeader: string | null, actionName: string, excludeCookies: string[] = []): Promise<void> {
+export async function setAuthCookies(setCookieHeader: string | null, actionName: string, excludeCookies: string[] = []): Promise<void> {
     if (setCookieHeader) {
         const parsedCookies = parseCookies(setCookieHeader);
         const store = await cookies();
