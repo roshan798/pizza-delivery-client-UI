@@ -2,13 +2,25 @@
 import { Input } from '@/components/ui/input';
 import Link from 'next/link';
 import { createUser, SignUpState } from '../actions/auth'; // Import SignUpState
-import { useActionState } from 'react';
+import { useActionState, useEffect } from 'react';
 import SignupButton from './components/SignupButton';
+import { useToast } from '@/components/ui/toast';
 
 export default function SignupPage() {
 	const initialState: SignUpState = { message: '', success: false };
 	const [state, formAction] = useActionState(createUser, initialState);
+	const { toast } = useToast();
 
+	useEffect(() => {
+		if (state.success === false && state.errors && state.errors.general) {
+			console.log('Signup failed:', state);
+			toast({
+				title: 'Signup Failed',
+				description: state.errors.general,
+				variant: 'error',
+			})
+		}
+	}, [state, toast]);
 
 	return (
 		<div className="min-h-screen flex items-center justify-center bg-gray-50 py-12">

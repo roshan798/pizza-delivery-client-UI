@@ -3,11 +3,23 @@ import { Input } from '@/components/ui/input';
 import Link from 'next/link';
 import { loginUser, LoginState } from '../actions/auth'; // Import LoginState
 import LoginButton from './components/LoginButton';
-import { useActionState } from 'react';
+import { useActionState, useEffect } from 'react';
+import { useToast } from '@/components/ui/toast';
 
 export default function LoginPage() {
 	const initialState: LoginState = { message: '', success: false };
 	const [state, formAction] = useActionState(loginUser, initialState);
+	const { toast } = useToast();
+	useEffect(() => {
+		if (state.success === false && state.errors && state.errors.general) {
+			console.log('Login failed:', state);
+			toast({
+				title: 'Login Failed',
+				description: state.errors.general,
+				variant: 'error',
+			})
+		}
+	}, [state, toast])
 	return (
 		<div className="min-h-screen flex items-center justify-center bg-gray-50 py-12">
 			<div className="w-full max-w-md bg-white rounded-lg shadow p-8 ">

@@ -34,7 +34,6 @@ function parseCookies(rawCookies: string): setCookie.Cookie[] {
 async function setAuthCookies(setCookieHeader: string | null, actionName: string, excludeCookies: string[] = []): Promise<void> {
     if (setCookieHeader) {
         const parsedCookies = parseCookies(setCookieHeader);
-        console.log(`Parsed Cookies for ${actionName}:`, parsedCookies);
         const store = await cookies();
         parsedCookies.forEach(cookie => {
             if (excludeCookies.includes(cookie.name)) {
@@ -84,7 +83,7 @@ export async function createUser(prevState: SignUpState, formData: FormData): Pr
     const email = formData.get('email');
     const password = formData.get('password');
     const signupReqBody = { firstName, lastName, email, password };
-    console.log('Signup request body:', signupReqBody);
+    // console.log('Signup request body:', signupReqBody);
     const res = await fetch(CONFIG.baseUrl + CONFIG.auth.signup, {
         method: 'POST',
         body: JSON.stringify(signupReqBody),

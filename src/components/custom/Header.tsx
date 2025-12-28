@@ -5,9 +5,9 @@ import CONFIG from '@/config';
 import { cookies } from 'next/headers';
 import { Button } from '../ui/button';
 import { TenantSelect } from './TenantSelect';
-import ClientCartIconWrapper from './ClientCartIconWrapper'; // Import the new client wrapper
+import ClientCartIconWrapper from './ClientCartIconWrapper'; 
 import { getSession } from '@/lib/session';
-import LogoutButton from './LogoutButton'; // Import the new LogoutButton client component
+import LogoutButton from './LogoutButton'; 
 
 export default async function Header() {
 	const baseUrl = CONFIG.baseUrl.replace('localhost', '127.0.0.1');
