@@ -49,7 +49,6 @@ function parseBase(pc?: Map<string, PriceConfiguration>) {
 	return bases;
 }
 
-
 export function ProductDialog({
 	open,
 	onOpenChange,
@@ -87,8 +86,13 @@ export function ProductDialog({
 	const toppingsUrl = CONFIG.baseUrl + CONFIG.toppings.url;
 
 	// get allCombinations of addons on this products that are added in the cart
-	const selectProductsForThisProduct = useMemo(() => makeSelectProductsByProductId(), []);
-	const productsInCart = useAppSelector((state) => selectProductsForThisProduct(state, product._id));
+	const selectProductsForThisProduct = useMemo(
+		() => makeSelectProductsByProductId(),
+		[]
+	);
+	const productsInCart = useAppSelector((state) =>
+		selectProductsForThisProduct(state, product._id)
+	);
 	const handleAddToCart = () => {
 		const productId = product._id;
 		const productName = product.name;
@@ -111,7 +115,7 @@ export function ProductDialog({
 			quantity: 1,
 			base,
 			toppings,
-			key: '' 
+			key: '',
 		};
 		// check same coposition is added or not is cart
 		const key = makeKey(cartItem);
@@ -123,7 +127,8 @@ export function ProductDialog({
 				// Show an in-app toast with action to view cart
 				toast({
 					title: 'Item already in cart',
-					description: 'This exact item (same size and toppings) is already in your cart.',
+					description:
+						'This exact item (same size and toppings) is already in your cart.',
 					actionText: 'View cart',
 					variant: 'warning',
 					onAction: () => {
@@ -145,7 +150,7 @@ export function ProductDialog({
 		}
 		// Call API or Server Action to add to cart
 		dispatch(addToCart(cartItem));
-		onOpenChange(false)
+		onOpenChange(false);
 		toast({
 			title: 'Item added to cart',
 			description: '',
@@ -156,12 +161,14 @@ export function ProductDialog({
 				onOpenChange(false);
 			},
 		});
-
-	}
+	};
 	const makeKey = (cart: Cart) => {
-		const toppingIds = cart.toppings.map(t => t.id).sort().join(',');
+		const toppingIds = cart.toppings
+			.map((t) => t.id)
+			.sort()
+			.join(',');
 		return `${cart.productId}|${cart.base.name}|${toppingIds}`;
-	}
+	};
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
 			<DialogContent className="w-[96vw] max-h-screen max-w-md sm:max-w-2xl md:max-w-4xl lg:max-w-5xl p-0 overflow-hidden">
@@ -240,15 +247,13 @@ export function ProductDialog({
 						)}
 
 						{/* Extra toppings */}
-						{
-							product.isToppingsAvailable &&
+						{product.isToppingsAvailable && (
 							<Toppings
 								url={toppingsUrl}
 								addons={addons}
 								setAddons={setAddons}
 							/>
-
-						}
+						)}
 
 						{/* Footer: total + actions */}
 						<div className="flex items-center justify-between pt-2 flex-wrap gap-4 border-t mt-4">
@@ -265,9 +270,7 @@ export function ProductDialog({
 									Close
 								</Button>
 
-								<Button
-									onClick={handleAddToCart}
-								>
+								<Button onClick={handleAddToCart}>
 									Add to Cart
 								</Button>
 							</div>

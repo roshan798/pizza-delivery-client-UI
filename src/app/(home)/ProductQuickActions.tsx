@@ -33,9 +33,7 @@ export function ProductQuickActions({
 							onClick={() => setOpen(true)}
 						>
 							{/* <Settings className="shrink-0" /> */}
-							<span className="ml-2">
-								Choose
-							</span>
+							<span className="ml-2">Choose</span>
 						</Button>
 					</TooltipTrigger>
 					<TooltipContent side="top" className="md:hidden">
@@ -43,8 +41,6 @@ export function ProductQuickActions({
 					</TooltipContent>
 				</Tooltip>
 			</TooltipProvider>
-
-
 
 			<ProductDialog
 				open={open}

@@ -18,7 +18,7 @@ export default function SignupPage() {
 				title: 'Signup Failed',
 				description: state.errors.general,
 				variant: 'error',
-			})
+			});
 		}
 	}, [state, toast]);
 
@@ -38,7 +38,9 @@ export default function SignupPage() {
 						<label className="block text-sm font-medium mb-1">
 							First name
 						</label>
-						<Input name='firstName' placeholder="First name"
+						<Input
+							name="firstName"
+							placeholder="First name"
 							hasError={!!state.errors?.firstName}
 							errorMessage={state.errors?.firstName}
 						/>
@@ -48,7 +50,9 @@ export default function SignupPage() {
 						<label className="block text-sm font-medium mb-1">
 							Last name
 						</label>
-						<Input name='lastName' placeholder="Last name"
+						<Input
+							name="lastName"
+							placeholder="Last name"
 							hasError={!!state.errors?.lastName}
 							errorMessage={state.errors?.lastName}
 						/>
@@ -58,7 +62,9 @@ export default function SignupPage() {
 						<label className="block text-sm font-medium mb-1">
 							Email
 						</label>
-						<Input name='email' placeholder="you@company.com"
+						<Input
+							name="email"
+							placeholder="you@company.com"
 							hasError={!!state.errors?.email}
 							errorMessage={state.errors?.email}
 						/>
@@ -68,7 +74,10 @@ export default function SignupPage() {
 						<label className="block text-sm font-medium mb-1">
 							Password
 						</label>
-						<Input name='password' type="password" placeholder="Your password"
+						<Input
+							name="password"
+							type="password"
+							placeholder="Your password"
 							hasError={!!state.errors?.password}
 							errorMessage={state.errors?.password}
 						/>

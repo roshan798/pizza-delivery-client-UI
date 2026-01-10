@@ -148,7 +148,7 @@ export default function ProductsHeader({
 				</Select>
 
 				<Button>
-				<Link href="/cart">View Cart</Link>
+					<Link href="/cart">View Cart</Link>
 				</Button>
 			</div>
 		</div>

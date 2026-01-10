@@ -34,8 +34,7 @@ export const mapServerFormErrors = (
 		return data.errors.reduce<Record<string, string>>((acc, err) => {
 			if (err.type == 'field') {
 				acc[err.path || 'general'] = err.msg || err.message;
-			}
-			else {
+			} else {
 				acc.general = err.msg || err.message;
 			}
 			return acc;
@@ -50,5 +49,3 @@ export const mapServerFormErrors = (
 	// Fallback
 	return { general: 'Something went wrong, please try again later.' };
 };
-
-

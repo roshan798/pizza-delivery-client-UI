@@ -1,4 +1,3 @@
-// TenantSelect.tsx (Client)
 'use client';
 import { useTransition, useState, useEffect } from 'react';
 import {
@@ -38,11 +37,12 @@ export function TenantSelect({
 			</SelectTrigger>
 			<SelectContent>
 				<SelectItem value="all">All</SelectItem>
-				{tenants && tenants.map((t) => (
-					<SelectItem key={t.id} value={t.id.toString()}>
-						{t.name}
-					</SelectItem>
-				))}
+				{tenants &&
+					tenants.map((t) => (
+						<SelectItem key={t.id} value={t.id.toString()}>
+							{t.name}
+						</SelectItem>
+					))}
 			</SelectContent>
 		</Select>
 	);

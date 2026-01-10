@@ -5,9 +5,9 @@ import CONFIG from '@/config';
 import { cookies } from 'next/headers';
 import { Button } from '../ui/button';
 import { TenantSelect } from './TenantSelect';
-import ClientCartIconWrapper from './ClientCartIconWrapper'; 
+import ClientCartIconWrapper from './ClientCartIconWrapper';
 import { getSession } from '@/lib/session';
-import LogoutButton from './LogoutButton'; 
+import LogoutButton from './LogoutButton';
 
 export default async function Header() {
 	const baseUrl = CONFIG.baseUrl.replace('localhost', '127.0.0.1');
@@ -26,7 +26,7 @@ export default async function Header() {
 					<Link href="/">
 						<Image src={Logo} alt="Pizza App" />
 					</Link>
-					<div className="hidden sm:block">
+					<div className="block">
 						<TenantSelect tenants={tenants} current={current} />
 					</div>
 				</div>
@@ -53,24 +53,17 @@ export default async function Header() {
 							Contact
 						</Link>
 					</nav>
-
-					<ClientCartIconWrapper /> {/* Use the client wrapper here */}
-
-					<div className="flex items-center gap-3">
-
-					</div>
-					{
-						session ?
-							<LogoutButton />
-							:
-							<Link href="/login">
-								<Button
-									variant="default"
-								>Login</Button> {/* Corrected: Login button should not call handleLogout */}
-							</Link>
-
-					}
-
+					<ClientCartIconWrapper />{' '}
+					{/* Use the client wrapper here */}
+					<div className="flex items-center gap-3"></div>
+					{session ? (
+						<LogoutButton />
+					) : (
+						<Link href="/login">
+							<Button variant="default">Login</Button>{' '}
+							{/* Corrected: Login button should not call handleLogout */}
+						</Link>
+					)}
 				</div>
 			</div>
 		</header>
