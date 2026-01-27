@@ -40,21 +40,16 @@ export default function AddressSelector({
 		null
 	);
 
+	// console.debug({ selectedAddressId, })
 	// Set initial selection
 	useEffect(() => {
 		const selected = addresses.find((addr) => addr.isPrimary);
 		if (selected) {
 			setSelectedAddressId(selected._id);
-			onAddressChange(selected.address, selected.city, selected.zipCode);
 		} else if (addresses.length > 0) {
 			setSelectedAddressId(addresses[0]._id);
-			onAddressChange(
-				addresses[0].address,
-				addresses[0].city,
-				addresses[0].zipCode
-			);
 		}
-	}, [addresses, onAddressChange]);
+	}, []);
 
 	const handleAddressSelection = (value: string) => {
 		setSelectedAddressId(value);
@@ -63,7 +58,10 @@ export default function AddressSelector({
 			return;
 		}
 		const selected = addresses.find((addr) => addr._id === value);
+
+		// console.debug({ selected, value })
 		if (selected) {
+			setSelectedAddressId(value);
 			onAddressChange(selected.address, selected.city, selected.zipCode);
 		}
 	};
@@ -206,17 +204,17 @@ export default function AddressSelector({
 					initialData={
 						editingAddress
 							? {
-									address: editingAddress.address,
-									city: editingAddress.city,
-									zipCode: editingAddress.zipCode,
-									isPrimary: editingAddress.isPrimary,
-								}
+								address: editingAddress.address,
+								city: editingAddress.city,
+								zipCode: editingAddress.zipCode,
+								isPrimary: editingAddress.isPrimary,
+							}
 							: {
-									address: '',
-									city: '',
-									zipCode: '',
-									isPrimary: false,
-								}
+								address: '',
+								city: '',
+								zipCode: '',
+								isPrimary: false,
+							}
 					}
 					onSave={updateAddress}
 					isEdit={true}

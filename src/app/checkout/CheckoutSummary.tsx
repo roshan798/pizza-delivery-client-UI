@@ -19,6 +19,8 @@ type CheckoutSummaryProps = {
 	discount: number;
 	grandTotal: number;
 	onPlaceOrder: () => void;
+	tenantName: string;
+	itemsCount: number;
 };
 
 export function CheckoutSummary(props: CheckoutSummaryProps) {

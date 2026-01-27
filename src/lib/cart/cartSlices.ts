@@ -6,6 +6,8 @@ export interface Cart {
 	productId: string;
 	productName: string;
 	productImg?: string;
+	tenantId: string;
+	
 	base: {
 		name: string;
 		price: number;
@@ -18,7 +20,15 @@ export interface Cart {
 	quantity: number;
 	key?: string;
 }
-type CartState = Cart[];
+
+interface TenantCartGroup {
+	tenantId: string;
+	tenantName?: string;  
+	items: Cart[];
+}
+
+type CartState = TenantCartGroup[];  // Array of tenant groups
+
 
 // Helper to load state from localStorage (used by client-side initialization)
 const loadState = (): CartState => {
@@ -53,7 +63,7 @@ const saveState = (state: CartState) => {
 
 export { loadState }; // Export loadState for use in client components
 
-const initialState: CartState = []; // Initialize state as empty for consistent SSR
+const initialState: CartState = [];
 
 const cartSlice = createSlice({
 	name: 'cart',
@@ -63,68 +73,136 @@ const cartSlice = createSlice({
 			return action.payload;
 		},
 		addToCart(state, action: PayloadAction<Cart>) {
-			console.log('Adding to cart:', action.payload);
-			state.push(action.payload);
-			saveState(state); // Save state after modification
+			const newItem = action.payload;
+			console.log('Adding to cart:', newItem);
+
+			// Find existing tenant group or create new one
+			let tenantGroup = state.find(group => group.tenantId === newItem.tenantId);
+
+			if (!tenantGroup) {
+				// Create new tenant group
+				tenantGroup = { tenantId: newItem.tenantId, items: [] };
+				state.push(tenantGroup);
+			}
+
+			// Add/update item within tenant group
+			const existingItem = tenantGroup.items.find(item => item.key === newItem.key);
+			if (existingItem) {
+				existingItem.quantity += newItem.quantity || 1;
+			} else {
+				tenantGroup.items.push(newItem);
+			}
+
+			saveState(state);
 		},
 		incrementProductQuantity(state, action: PayloadAction<string>) {
-			// i will be getting the key here
 			const key = action.payload;
-			const existingItem = state.find((item) => item.key === key);
-			if (existingItem) {
-				existingItem.quantity += 1;
-				saveState(state); // Save state after modification
+			for (const group of state) {
+				const existingItem = group.items.find(item => item.key === key);
+				if (existingItem) {
+					existingItem.quantity += 1;
+					saveState(state);
+					return;
+				}
 			}
 		},
 		decrementProductQuantity(state, action: PayloadAction<string>) {
-			// i will be getting the key here
-
 			const key = action.payload;
-			const existingItem = state.find((item) => item.key === key);
-			console.log(
-				'Decrementing product quantity for key:',
-				key,
-				existingItem
-			);
-			if (existingItem && existingItem.quantity === 1) {
-				const newState = state.filter((item) => item.key !== key);
-				saveState(newState); // Save the filtered state
-				return newState;
-			}
-			if (existingItem && existingItem.quantity > 1) {
-				existingItem.quantity -= 1;
-				saveState(state); // Save state after modification
+			for (const group of state) {
+				const existingItemIndex = group.items.findIndex(item => item.key === key);
+				if (existingItemIndex !== -1) {
+					const existingItem = group.items[existingItemIndex];
+					if (existingItem.quantity === 1) {
+						group.items.splice(existingItemIndex, 1);
+						if (group.items.length === 0) {
+							// Remove empty tenant group
+							const groupIndex = state.indexOf(group);
+							state.splice(groupIndex, 1);
+						}
+					} else {
+						existingItem.quantity -= 1;
+					}
+					saveState(state);
+					return;
+				}
 			}
 		},
-		removeFromCart(state, action: PayloadAction<number>) {
-			state.splice(action.payload, 1);
-			saveState(state); // Save state after modification
+		removeFromCart(state, action: PayloadAction<{ tenantId: string; itemIndex: number }>) {
+			const { tenantId, itemIndex } = action.payload;
+			const tenantGroup = state.find(group => group.tenantId === tenantId);
+			if (tenantGroup) {
+				tenantGroup.items.splice(itemIndex, 1);
+				if (tenantGroup.items.length === 0) {
+					const groupIndex = state.indexOf(tenantGroup);
+					state.splice(groupIndex, 1);
+				}
+				saveState(state);
+			}
 		},
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		clearCart(state) {
 			const newState: CartState = [];
-			saveState(newState); // Save the empty state
+			saveState(newState);
 			return newState;
 		},
 	},
 });
 
-// Basic selectors
-export const selectCart = (state: RootState) => state.cart;
+// Get all tenant groups
+export const selectCartGroups = (state: RootState) => state.cart;
 
-// Factory selector: returns a memoized selector instance for a given productId
+// Total items count
+export const selectTotalItems = createSelector(
+	[selectCartGroups],
+	(groups) => groups.reduce((total, group) =>
+		total + group.items.reduce((sum, item) => sum + item.quantity, 0), 0)
+);
+
+// Check if multi-tenant
+export const selectIsMultiTenant = createSelector(
+	[selectCartGroups],
+	(groups) => groups.length > 1
+);
+
+// Get items by tenantId
+export const selectItemsByTenant = createSelector(
+	[selectCartGroups, (_: RootState, tenantId: string) => tenantId],
+	(groups, tenantId) => {
+		const group = groups.find(g => g.tenantId === tenantId);
+		return group ? group.items : [];
+	}
+);
+
+// export const selectItemByProductId = createSelector(
+// 	[selectCartGroups, (_: RootState, productId: string) => productId],
+// 	(groups, productId) => {
+// 		for (const group of groups) {
+// 			const item = group.items.find(i => i.productId === productId);
+// 			if (item) {
+// 				return item;
+// 			}
+// 		}
+// 		return null;
+// 	}
+// );
+
+//
 export const makeSelectProductsByProductId = () =>
 	createSelector(
-		[selectCart, (_: RootState, productId: string) => productId],
-		(cart, productId) => cart.filter((item) => item.productId === productId)
+		[selectCartGroups, (_: RootState, productId: string) => productId],
+		(cartGroups, productId) => {
+			const allItems = cartGroups.flatMap(group => group.items);
+			return allItems.filter((item) => item.productId === productId);
+		}
 	);
 
 export const {
 	addToCart,
 	removeFromCart,
 	clearCart,
-	setCart, // Export the new action
+	setCart,
 	incrementProductQuantity,
 	decrementProductQuantity,
 } = cartSlice.actions;
+
 export default cartSlice.reducer;

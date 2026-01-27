@@ -1,10 +1,11 @@
 import { configureStore } from '@reduxjs/toolkit';
 import cartReducer from './cart/cartSlices';
-
+import tenantReducer from './tenants/tenantSlice';
 export const makeStore = () => {
 	return configureStore({
 		reducer: {
 			cart: cartReducer,
+			tenants: tenantReducer
 		},
 	});
 };

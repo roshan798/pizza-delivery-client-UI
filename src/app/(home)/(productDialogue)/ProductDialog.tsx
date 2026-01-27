@@ -97,6 +97,7 @@ export function ProductDialog({
 		const productId = product._id;
 		const productName = product.name;
 		const productImg = imgSrc;
+		const tenantId = product.tenantId;
 		const base = {
 			name: size,
 			price: basePrice,
@@ -112,6 +113,7 @@ export function ProductDialog({
 			productId,
 			productName,
 			productImg,
+			tenantId,
 			quantity: 1,
 			base,
 			toppings,

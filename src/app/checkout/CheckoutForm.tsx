@@ -45,7 +45,9 @@ export interface Customer {
 	updatedAt?: Date;
 }
 
+
 type FormData = {
+	customerId: string;
 	firstName: string;
 	lastName: string;
 	email: string;
@@ -53,7 +55,7 @@ type FormData = {
 	address: string;
 	city: string;
 	zip: string;
-	paymentMethod: string;
+	paymentMethod: "CASH" | "CARD";
 	couponCode: string;
 };
 
@@ -62,6 +64,7 @@ interface CheckoutFormProps {
 }
 
 const initialFormData: FormData = {
+	customerId: '',
 	firstName: '',
 	lastName: '',
 	email: '',
@@ -69,14 +72,14 @@ const initialFormData: FormData = {
 	address: '',
 	city: '',
 	zip: '',
-	paymentMethod: 'cashOnDelivery',
+	paymentMethod: 'CASH',
 	couponCode: '',
 };
 
 export function CheckoutForm({ onFormChange }: CheckoutFormProps) {
 	const [formData, setFormData] = useState<FormData>(initialFormData);
 	const [customer, setCustomer] = useState<Customer | null>(null);
-	const [loading, setLoading] = useState(true); // Add loading state
+	const [loading, setLoading] = useState(true);
 
 	useEffect(() => {
 		const fetchCustomer = async () => {
@@ -101,9 +104,10 @@ export function CheckoutForm({ onFormChange }: CheckoutFormProps) {
 					const primaryContact = data.customer.Contact.find(
 						(contact: Contact) => contact.isPrimary
 					);
-					console.log({ primaryAddress, primaryContact });
+					// console.log({ primaryAddress, primaryContact });
 					setFormData((prev) => ({
 						...prev,
+						customerId: data.customer._id,
 						firstName: data.customer.firstName,
 						lastName: data.customer.lastName,
 						email: data.customer.email,
@@ -130,20 +134,28 @@ export function CheckoutForm({ onFormChange }: CheckoutFormProps) {
 		e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
 	) => {
 		const { id, value } = e.target;
+		// console.debug("handleChange", { id, value })
 		setFormData((prev) => ({ ...prev, [id]: value }));
 	};
 
 	const updatePhone = (phone: string) => {
+		// console.debug("updatePhone", { phone })
+
 		setFormData((prev) => ({ ...prev, phone }));
 	};
 
-	const updatePayment = (paymentMethod: string) => {
+	const updatePayment = (paymentMethod: "CASH" | "CARD") => {
+
 		setFormData((prev) => ({ ...prev, paymentMethod }));
 	};
 
-	console.debug({ formData });
+	const updateAddress = (address: string, city: string, zip: string) => {
+		console.debug("updateAddress", { address, city, zip })
+		setFormData((prev) => ({ ...prev, address, city, zip }));
+	};
 
-	// Loading skeleton
+
+
 	if (loading) {
 		return (
 			<Card className="flex-1">
@@ -189,6 +201,7 @@ export function CheckoutForm({ onFormChange }: CheckoutFormProps) {
 				<form className="space-y-6">
 					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 						<div className="space-y-2">
+							<input type="text" id="customerId" name='customerId' value={formData.customerId} hidden readOnly />
 							<Label htmlFor="firstName">First Name</Label>
 							<Input
 								id="firstName"
@@ -229,7 +242,7 @@ export function CheckoutForm({ onFormChange }: CheckoutFormProps) {
 
 					<AddressSelector
 						addresses={customer?.address || []}
-						onAddressChange={() => {}}
+						onAddressChange={updateAddress}
 					/>
 
 					<CouponSection

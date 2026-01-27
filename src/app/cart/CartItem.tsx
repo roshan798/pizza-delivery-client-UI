@@ -19,10 +19,11 @@ import {
 
 interface CartItemProps {
 	item: Cart;
-	index: number;
+	tenantId: string;  
+	itemIndex: number; 
 }
 
-export function CartItem({ item, index }: CartItemProps) {
+export function CartItem({ item, tenantId, itemIndex }: CartItemProps) {
 	const dispatch = useAppDispatch();
 
 	const toppingsTotal = item.toppings.reduce((sum, t) => sum + t.price, 0);
@@ -51,8 +52,7 @@ export function CartItem({ item, index }: CartItemProps) {
 						{item.productName}
 					</h3>
 					<p className="text-sm text-muted-foreground">
-						Size: {item.base.name}{' '}
-						{/*({formatPrice(item.base.price)})*/}
+						Size: {item.base.name}
 					</p>
 					{item.toppings.length > 0 && (
 						<div className="mt-2 flex flex-wrap gap-1">
@@ -61,7 +61,7 @@ export function CartItem({ item, index }: CartItemProps) {
 									key={t.id}
 									className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800"
 								>
-									{t.name} {/*(+{formatPrice(t.price)})*/}
+									{t.name}
 								</span>
 							))}
 						</div>
@@ -100,7 +100,7 @@ export function CartItem({ item, index }: CartItemProps) {
 								variant="ghost"
 								size="icon"
 								className="text-muted-foreground hover:text-destructive ml-2"
-								onClick={() => dispatch(removeFromCart(index))}
+								onClick={() => dispatch(removeFromCart({ tenantId, itemIndex }))}
 							>
 								<Trash2 className="h-4 w-4" />
 							</Button>

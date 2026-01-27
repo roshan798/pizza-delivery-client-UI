@@ -3,8 +3,8 @@
 import { Label } from '@/components/ui/label';
 
 type PaymentSelectorProps = {
-	paymentMethod: string;
-	onChange: (method: string) => void;
+	paymentMethod: "CASH" | "CARD";
+	onChange: (method: "CASH" | "CARD") => void;
 };
 
 export default function PaymentSelector({
@@ -20,9 +20,9 @@ export default function PaymentSelector({
 						type="radio"
 						id="cashOnDelivery"
 						name="paymentMethod"
-						value="cashOnDelivery"
-						checked={paymentMethod === 'cashOnDelivery'}
-						onChange={(e) => onChange(e.target.value)}
+						value="CASH"
+						checked={paymentMethod === 'CASH'}
+						onChange={(e) => onChange(e.target.value as 'CASH' | 'CARD')}
 						className="h-4 w-4 text-primary focus:ring-primary border-gray-300"
 					/>
 					<Label htmlFor="cashOnDelivery">Cash on Delivery</Label>
@@ -33,15 +33,15 @@ export default function PaymentSelector({
 						id="cardPayment"
 						name="paymentMethod"
 						value="cardPayment"
-						checked={paymentMethod === 'cardPayment'}
-						onChange={(e) => onChange(e.target.value)}
+						checked={paymentMethod === 'CARD'}
+						onChange={(e) => onChange(e.target.value as 'CASH' | 'CARD')}
 						className="h-4 w-4 text-primary focus:ring-primary border-gray-300"
 						disabled
 					/>
 					<Label
 						htmlFor="cardPayment"
 						className={
-							paymentMethod === 'cardPayment'
+							paymentMethod === 'CARD'
 								? ''
 								: 'text-gray-400'
 						}

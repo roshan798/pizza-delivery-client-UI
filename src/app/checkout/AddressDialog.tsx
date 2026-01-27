@@ -82,7 +82,6 @@ export default function AddressDialog({
 	};
 
 	const canDelete = isEdit && !!initialData; // Only show delete for edit mode
-	console.log({ canDelete, isEdit, addressId });
 	const handleDelete = async () => {
 		if (canDelete && onDelete) {
 			await onDelete(addressId!);

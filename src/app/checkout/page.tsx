@@ -1,13 +1,25 @@
 import { getSession } from '@/lib/session';
 import { redirect } from 'next/navigation';
 import CheckoutClientPage from './CheckoutClientPage';
+import { SearchParams } from 'next/dist/server/request/search-params';
 
-const CheckoutPage = async () => {
+interface CheckoutPageProps {
+	searchParams: SearchParams;
+}
+
+const CheckoutPage = async ({ searchParams }: CheckoutPageProps) => {
 	const session = await getSession();
 	if (!session) {
 		redirect(`/login?return-to=${encodeURIComponent('/checkout')}`);
 	}
-	return <CheckoutClientPage />;
+
+	const tenantId = searchParams?.tenant as string | undefined;
+	if (!tenantId) {
+		redirect(`/`);
+	}
+
+
+	return <CheckoutClientPage tenantId={tenantId} />;
 };
 
 export default CheckoutPage;

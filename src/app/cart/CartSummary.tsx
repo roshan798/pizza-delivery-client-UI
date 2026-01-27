@@ -18,6 +18,9 @@ interface CartSummaryProps {
 	delivery: number;
 	tax: number;
 	grandTotal: number;
+	isGrouped?: boolean;
+	tenantId?: string;
+	tenantName?: string;
 }
 
 export function CartSummary({
@@ -25,15 +28,27 @@ export function CartSummary({
 	delivery,
 	tax,
 	grandTotal,
+	isGrouped = false,
+	tenantId,
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	tenantName,
 }: CartSummaryProps) {
+	const tenantCheckoutHref = tenantId ? `/checkout?tenant=${tenantId}` : '/checkout';
+
 	return (
-		<Card className="w-full lg:max-w-sm self-start">
-			<CardHeader>
+		<Card className={` p-0 w-full ${isGrouped ? 'lg:max-w-sm self-start' : 'lg:w-80'} shadow-none border-none`}>
+			<CardHeader className="pb-3">
+
 				<CardTitle>Order Summary</CardTitle>
+
 				<CardDescription>
-					Review your order before checkout.
+					{isGrouped
+						? 'Review Restraunt order.'
+						: 'Review all orders before checkout.'
+					}
 				</CardDescription>
 			</CardHeader>
+
 			<CardContent className="space-y-3">
 				<div className="flex items-center justify-between text-sm">
 					<span className="text-muted-foreground">Items total</span>
@@ -57,19 +72,34 @@ export function CartSummary({
 				<Separator className="my-4" />
 
 				<div className="flex items-center justify-between text-base">
-					<span className="font-semibold">Total to pay</span>
+					<span className="font-semibold">Total</span>
 					<span className="text-lg font-bold">
 						₹{formatPrice(grandTotal)}
 					</span>
 				</div>
 			</CardContent>
-			<CardFooter className="flex flex-col gap-2">
-				<Button className="w-full">
-					<Link href="/checkout">Proceed to checkout</Link>
-				</Button>
-				<Button variant="outline" className="w-full" asChild>
-					<Link href="/">Continue shopping</Link>
-				</Button>
+
+			<CardFooter className="flex flex-col gap-2 pt-4">
+				{isGrouped ? (
+					// Single tenant checkout
+					<Button className="w-full" asChild>
+						<Link href={tenantCheckoutHref}>
+							Checkout
+						</Link>
+					</Button>
+				) : (
+					// Overall checkout with multi-tenant info
+					<>
+						<Button className="w-full " size="lg" asChild disabled={itemsTotal !== 0}>
+							<Link href={tenantCheckoutHref}>
+								Place All Orders ({itemsTotal > 0 && `₹${formatPrice(grandTotal)}`})
+							</Link>
+						</Button>
+						<Button variant="outline" className="w-full" asChild>
+							<Link href="/">Continue shopping</Link>
+						</Button>
+					</>
+				)}
 			</CardFooter>
 		</Card>
 	);

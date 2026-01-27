@@ -1,22 +1,26 @@
 'use client';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useEffect, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '@/lib/hooks';
 import { loadState, setCart } from '@/lib/cart/cartSlices';
 import { CartLoading } from '../cart/CartLoading';
-import { EmptyCart } from '../cart/EmptyCart';
 import { CheckoutForm } from './CheckoutForm';
 import { useToast } from '@/components/ui/toast';
 import { CheckoutSummary } from './CheckoutSummary';
+import CONFIG from '@/config';
 
-const CheckoutClientPage = () => {
-	const cart = useAppSelector((state) => state.cart);
+interface CheckoutClientPageProps {
+	tenantId: string; 
+}
+
+const CheckoutClientPage = ({ tenantId }: CheckoutClientPageProps) => {
+	const cartGroups = useAppSelector((state) => state.cart);
 	const dispatch = useAppDispatch();
-	const [isLoadedFromLocalStorage, setIsLoadedFromLocalStorage] =
-		useState(false);
-
+	const [isLoadedFromLocalStorage, setIsLoadedFromLocalStorage] = useState(false);
 	const { toast } = useToast();
+
 	const [formData, setFormData] = useState({
+		customerId: '',
 		firstName: '',
 		lastName: '',
 		email: '',
@@ -24,11 +28,11 @@ const CheckoutClientPage = () => {
 		address: '',
 		city: '',
 		zip: '',
-		paymentMethod: 'cashOnDelivery',
+		paymentMethod: 'CASH' as "CASH" | "CARD",
 		couponCode: '',
 	});
+
 	useEffect(() => {
-		// This effect runs only on the client side after hydration
 		const storedCart = loadState();
 		if (storedCart.length > 0) {
 			dispatch(setCart(storedCart));
@@ -36,47 +40,132 @@ const CheckoutClientPage = () => {
 		setIsLoadedFromLocalStorage(true);
 	}, [dispatch]);
 
+	// Filter ONLY for specific tenantId
+	const tenantGroup = useMemo(() =>
+		cartGroups.find(group => group.tenantId === tenantId)
+		, [cartGroups, tenantId]);
+
 	const handleFormChange = useCallback((data: typeof formData) => {
 		setFormData(data);
 	}, []);
 
-	const itemsTotal = cart.reduce(
-		(sum, item) =>
-			sum +
-			(item.base.price + item.toppings.reduce((s, t) => s + t.price, 0)) *
-				item.quantity,
-		0
-	);
+	// Calculate totals for THIS tenant only
+	const { itemsTotal, grandTotal, itemsCount } = useMemo(() => {
+		if (!tenantGroup) {
+			return { itemsTotal: 0, grandTotal: 0, itemsCount: 0 };
+		}
 
-	const delivery = cart.length ? 40 : 0; // example
-	const discount = 0; // For now, discount is 0. This would come from coupon application.
-	const tax = Math.round((itemsTotal - discount) * 0.05); // example 5% of (itemsTotal - discount)
-	const grandTotal = itemsTotal + delivery + tax - discount;
+		const total = tenantGroup.items.reduce((sum, item) => {
+			const itemTotal = item.base.price + item.toppings.reduce((s, t) => s + t.price, 0);
+			return sum + (itemTotal * item.quantity);
+		}, 0);
 
-	const handlePlaceOrder = useCallback(() => {
-		console.log('Placing order with:', formData, 'Totals:', {
+		const itemsCount = tenantGroup.items.reduce((sum, item) => sum + item.quantity, 0);
+		const delivery = tenantGroup.items.length ? 40 : 0;
+		const discount = 0;
+		const tax = Math.round((total - discount) * 0.05);
+		const grandTotal = total + delivery + tax - discount;
+
+		return { itemsTotal: total, grandTotal, itemsCount };
+	}, [tenantGroup]);
+
+	const handlePlaceOrder = useCallback(async () => {
+		if (!tenantGroup || !tenantGroup.items.length) {
+			toast({
+				title: 'No Items',
+				description: `No items found for ${tenantId}`,
+				variant: 'error',
+			});
+			return;
+		}
+
+		console.log(`Placing order for tenant: ${tenantId}`, {
+			formData,
 			itemsTotal,
-			delivery,
-			tax,
-			discount,
-			grandTotal,
+			grandTotal
 		});
-		toast({
-			title: 'Order Placed!',
-			description: 'Your order has been successfully placed. Thank you!',
-			variant: 'success',
-		});
-		// In a real application, you would send formData and totals to your backend
-		// dispatch(clearCart()); // Clear cart after successful order
-		// router.push('/order-confirmation'); // Redirect to confirmation page
-	}, [formData, itemsTotal, delivery, tax, discount, grandTotal, toast]);
+
+		const items: OrderItemRequest[] = tenantGroup.items.map(item => ({
+			productId: item.productId,
+			productName: item.productName,
+			quantity: item.quantity,
+			base: {
+				name: item.base.name,
+				price: item.base.price,
+			},
+			toppings: item.toppings.map(t => ({
+				id: t.id,
+				name: t.name,
+				price: t.price,
+			})),
+			key: item.key!,
+		}));
+
+		const orderData: CreateOrderRequest = {
+			customerId: formData.customerId,
+			address: `${formData.address}, ${formData.city}, ${formData.zip}`,
+			phone: formData.phone,
+			paymentMode: formData.paymentMethod,
+			subTotal: itemsTotal,
+			tax: Math.round(itemsTotal * 0.05),
+			deliveryCharge: 40,
+			delivery: 40,
+			discount: 0,
+			grandTotal: grandTotal,
+			couponCode: formData.couponCode || "",
+			items,
+		};
+
+		try {
+			const res = await fetch(CONFIG.baseUrl + CONFIG.order.url + "/orders", {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				credentials: 'include',
+				body: JSON.stringify(orderData),
+			});
+
+			if (!res.ok) throw new Error(`Order failed: ${res.status}`);
+
+			const result = await res.json();
+			toast({
+				title: 'Order Placed!',
+				description: `Your order from ${tenantGroup.tenantName || tenantId} has been placed successfully!`,
+				variant: 'success',
+			});
+
+			console.log('Order created:', result);
+			// dispatch(clearCart()); // Clear specific tenant group instead
+			// router.push('/order-confirmation');
+		} catch (error) {
+			toast({
+				title: 'Order Failed',
+				description: 'Please try again.',
+				variant: 'error',
+			});
+			console.error('Order error:', error);
+		}
+	}, [formData, tenantGroup, tenantId, itemsTotal, grandTotal, toast]);
 
 	if (!isLoadedFromLocalStorage) {
-		return <CartLoading />; // Use the existing CartLoading component
+		return <CartLoading />;
 	}
 
-	if (!cart.length) {
-		return <EmptyCart />; // Use the existing EmptyCart component
+	if (!tenantGroup || !tenantGroup.items.length) {
+		return (
+			<div className="mx-auto max-w-2xl py-12 px-4">
+				<div className="text-center">
+					<h1 className="text-2xl font-bold text-gray-900 mb-4">
+						No Items Found
+					</h1>
+					<p className="text-muted-foreground mb-8 max-w-md mx-auto">
+						No items found for vendor {tenantId}. Please check your cart and try again.
+					</p>
+					<a href="/cart" className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+						← Back to Cart
+					</a>
+				</div>
+			</div>
+		);
 	}
 
 	return (
@@ -87,10 +176,12 @@ const CheckoutClientPage = () => {
 			{/* Right: Order Summary */}
 			<CheckoutSummary
 				itemsTotal={itemsTotal}
-				delivery={delivery}
-				tax={tax}
-				discount={discount}
+				delivery={40}
+				tax={Math.round(itemsTotal * 0.05)}
+				discount={0}
 				grandTotal={grandTotal}
+				itemsCount={itemsCount}
+				tenantName={tenantGroup.tenantName || tenantId}
 				onPlaceOrder={handlePlaceOrder}
 			/>
 		</div>
@@ -98,3 +189,41 @@ const CheckoutClientPage = () => {
 };
 
 export default CheckoutClientPage;
+
+
+
+// TODO : Move below code to type file 
+// Client-to-Server Order Request Type (exact match to your JSON)
+export interface CreateOrderRequest {
+	customerId: string;
+	address: string;
+	phone: string;
+	paymentMode: 'CASH' | 'CARD';
+	couponCode?: string;
+	subTotal: number;
+	tax: number;
+	deliveryCharge: number;
+	delivery: number;
+	discount: number;
+	grandTotal: number;
+
+	items: OrderItemRequest[];
+}
+
+export interface OrderItemRequest {
+	productId: string;
+	productName: string;
+	quantity: number;
+	base: {
+		name: string;
+		price: number;
+	};
+	toppings: ToppingRequest[];
+	key: string;
+}
+
+export interface ToppingRequest {
+	id: string;
+	name: string;
+	price: number;
+}
