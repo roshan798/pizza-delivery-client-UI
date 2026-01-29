@@ -204,17 +204,17 @@ export default function AddressSelector({
 					initialData={
 						editingAddress
 							? {
-								address: editingAddress.address,
-								city: editingAddress.city,
-								zipCode: editingAddress.zipCode,
-								isPrimary: editingAddress.isPrimary,
-							}
+									address: editingAddress.address,
+									city: editingAddress.city,
+									zipCode: editingAddress.zipCode,
+									isPrimary: editingAddress.isPrimary,
+								}
 							: {
-								address: '',
-								city: '',
-								zipCode: '',
-								isPrimary: false,
-							}
+									address: '',
+									city: '',
+									zipCode: '',
+									isPrimary: false,
+								}
 					}
 					onSave={updateAddress}
 					isEdit={true}

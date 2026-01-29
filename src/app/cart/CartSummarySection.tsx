@@ -1,11 +1,6 @@
 'use client';
 
-import {
-	Card,
-	CardContent,
-	CardHeader,
-	CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { CartSummary } from './CartSummary';
@@ -20,7 +15,12 @@ interface CartSummarySectionProps {
 	vendorCount: number;
 }
 
-export function CartSummarySection({ tenantSummaries, isMultiTenant, overallTotal, vendorCount }: CartSummarySectionProps) {
+export function CartSummarySection({
+	tenantSummaries,
+	isMultiTenant,
+	overallTotal,
+	vendorCount,
+}: CartSummarySectionProps) {
 	return (
 		<div className="lg:w-80 space-y-4">
 			{tenantSummaries.map((summary) => (
@@ -41,8 +41,8 @@ export function CartSummarySection({ tenantSummaries, isMultiTenant, overallTota
 							tax={summary.tax}
 							grandTotal={summary.grandTotal}
 							isGrouped={true}
-                            tenantId={summary.tenantId}
-                            tenantName={summary.tenantName}
+							tenantId={summary.tenantId}
+							tenantName={summary.tenantName}
 						/>
 					</CardContent>
 				</Card>
@@ -58,12 +58,17 @@ export function CartSummarySection({ tenantSummaries, isMultiTenant, overallTota
 							₹{formatPrice(overallTotal)}
 						</div>
 						<p className="text-sm text-muted-foreground mt-1">
-							{vendorCount} separate order{vendorCount !== 1 ? 's' : ''}
+							{vendorCount} separate order
+							{vendorCount !== 1 ? 's' : ''}
 						</p>
-						<Button className="w-full mt-4" size="lg" asChild disabled={true} hidden>
-							<Link href="/checkout">
-								Place All Orders
-							</Link>
+						<Button
+							className="w-full mt-4"
+							size="lg"
+							asChild
+							disabled={true}
+							hidden
+						>
+							<Link href="/checkout">Place All Orders</Link>
 						</Button>
 					</CardContent>
 				</Card>

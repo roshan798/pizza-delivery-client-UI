@@ -5,7 +5,7 @@ export const makeStore = () => {
 	return configureStore({
 		reducer: {
 			cart: cartReducer,
-			tenants: tenantReducer
+			tenants: tenantReducer,
 		},
 	});
 };

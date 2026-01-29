@@ -10,13 +10,14 @@ import { CheckoutSummary } from './CheckoutSummary';
 import CONFIG from '@/config';
 
 interface CheckoutClientPageProps {
-	tenantId: string; 
+	tenantId: string;
 }
 
 const CheckoutClientPage = ({ tenantId }: CheckoutClientPageProps) => {
 	const cartGroups = useAppSelector((state) => state.cart);
 	const dispatch = useAppDispatch();
-	const [isLoadedFromLocalStorage, setIsLoadedFromLocalStorage] = useState(false);
+	const [isLoadedFromLocalStorage, setIsLoadedFromLocalStorage] =
+		useState(false);
 	const { toast } = useToast();
 
 	const [formData, setFormData] = useState({
@@ -28,7 +29,7 @@ const CheckoutClientPage = ({ tenantId }: CheckoutClientPageProps) => {
 		address: '',
 		city: '',
 		zip: '',
-		paymentMethod: 'CASH' as "CASH" | "CARD",
+		paymentMethod: 'CASH' as 'CASH' | 'CARD',
 		couponCode: '',
 	});
 
@@ -41,9 +42,10 @@ const CheckoutClientPage = ({ tenantId }: CheckoutClientPageProps) => {
 	}, [dispatch]);
 
 	// Filter ONLY for specific tenantId
-	const tenantGroup = useMemo(() =>
-		cartGroups.find(group => group.tenantId === tenantId)
-		, [cartGroups, tenantId]);
+	const tenantGroup = useMemo(
+		() => cartGroups.find((group) => group.tenantId === tenantId),
+		[cartGroups, tenantId]
+	);
 
 	const handleFormChange = useCallback((data: typeof formData) => {
 		setFormData(data);
@@ -56,11 +58,16 @@ const CheckoutClientPage = ({ tenantId }: CheckoutClientPageProps) => {
 		}
 
 		const total = tenantGroup.items.reduce((sum, item) => {
-			const itemTotal = item.base.price + item.toppings.reduce((s, t) => s + t.price, 0);
-			return sum + (itemTotal * item.quantity);
+			const itemTotal =
+				item.base.price +
+				item.toppings.reduce((s, t) => s + t.price, 0);
+			return sum + itemTotal * item.quantity;
 		}, 0);
 
-		const itemsCount = tenantGroup.items.reduce((sum, item) => sum + item.quantity, 0);
+		const itemsCount = tenantGroup.items.reduce(
+			(sum, item) => sum + item.quantity,
+			0
+		);
 		const delivery = tenantGroup.items.length ? 40 : 0;
 		const discount = 0;
 		const tax = Math.round((total - discount) * 0.05);
@@ -82,10 +89,10 @@ const CheckoutClientPage = ({ tenantId }: CheckoutClientPageProps) => {
 		console.log(`Placing order for tenant: ${tenantId}`, {
 			formData,
 			itemsTotal,
-			grandTotal
+			grandTotal,
 		});
 
-		const items: OrderItemRequest[] = tenantGroup.items.map(item => ({
+		const items: OrderItemRequest[] = tenantGroup.items.map((item) => ({
 			productId: item.productId,
 			productName: item.productName,
 			quantity: item.quantity,
@@ -93,7 +100,7 @@ const CheckoutClientPage = ({ tenantId }: CheckoutClientPageProps) => {
 				name: item.base.name,
 				price: item.base.price,
 			},
-			toppings: item.toppings.map(t => ({
+			toppings: item.toppings.map((t) => ({
 				id: t.id,
 				name: t.name,
 				price: t.price,
@@ -112,17 +119,20 @@ const CheckoutClientPage = ({ tenantId }: CheckoutClientPageProps) => {
 			delivery: 40,
 			discount: 0,
 			grandTotal: grandTotal,
-			couponCode: formData.couponCode || "",
+			couponCode: formData.couponCode || '',
 			items,
 		};
 
 		try {
-			const res = await fetch(CONFIG.baseUrl + CONFIG.order.url + "/orders", {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				credentials: 'include',
-				body: JSON.stringify(orderData),
-			});
+			const res = await fetch(
+				CONFIG.baseUrl + CONFIG.order.url + '/orders',
+				{
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					credentials: 'include',
+					body: JSON.stringify(orderData),
+				}
+			);
 
 			if (!res.ok) throw new Error(`Order failed: ${res.status}`);
 
@@ -158,9 +168,13 @@ const CheckoutClientPage = ({ tenantId }: CheckoutClientPageProps) => {
 						No Items Found
 					</h1>
 					<p className="text-muted-foreground mb-8 max-w-md mx-auto">
-						No items found for vendor {tenantId}. Please check your cart and try again.
+						No items found for vendor {tenantId}. Please check your
+						cart and try again.
 					</p>
-					<a href="/cart" className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+					<a
+						href="/cart"
+						className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+					>
 						← Back to Cart
 					</a>
 				</div>
@@ -190,9 +204,7 @@ const CheckoutClientPage = ({ tenantId }: CheckoutClientPageProps) => {
 
 export default CheckoutClientPage;
 
-
-
-// TODO : Move below code to type file 
+// TODO : Move below code to type file
 // Client-to-Server Order Request Type (exact match to your JSON)
 export interface CreateOrderRequest {
 	customerId: string;

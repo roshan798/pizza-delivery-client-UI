@@ -33,19 +33,21 @@ export function CartSummary({
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	tenantName,
 }: CartSummaryProps) {
-	const tenantCheckoutHref = tenantId ? `/checkout?tenant=${tenantId}` : '/checkout';
+	const tenantCheckoutHref = tenantId
+		? `/checkout?tenant=${tenantId}`
+		: '/checkout';
 
 	return (
-		<Card className={` p-0 w-full ${isGrouped ? 'lg:max-w-sm self-start' : 'lg:w-80'} shadow-none border-none`}>
+		<Card
+			className={` p-0 w-full ${isGrouped ? 'lg:max-w-sm self-start' : 'lg:w-80'} shadow-none border-none`}
+		>
 			<CardHeader className="pb-3">
-
 				<CardTitle>Order Summary</CardTitle>
 
 				<CardDescription>
 					{isGrouped
 						? 'Review Restraunt order.'
-						: 'Review all orders before checkout.'
-					}
+						: 'Review all orders before checkout.'}
 				</CardDescription>
 			</CardHeader>
 
@@ -83,16 +85,22 @@ export function CartSummary({
 				{isGrouped ? (
 					// Single tenant checkout
 					<Button className="w-full" asChild>
-						<Link href={tenantCheckoutHref}>
-							Checkout
-						</Link>
+						<Link href={tenantCheckoutHref}>Checkout</Link>
 					</Button>
 				) : (
 					// Overall checkout with multi-tenant info
 					<>
-						<Button className="w-full " size="lg" asChild disabled={itemsTotal !== 0}>
+						<Button
+							className="w-full "
+							size="lg"
+							asChild
+							disabled={itemsTotal !== 0}
+						>
 							<Link href={tenantCheckoutHref}>
-								Place All Orders ({itemsTotal > 0 && `₹${formatPrice(grandTotal)}`})
+								Place All Orders (
+								{itemsTotal > 0 &&
+									`₹${formatPrice(grandTotal)}`}
+								)
 							</Link>
 						</Button>
 						<Button variant="outline" className="w-full" asChild>

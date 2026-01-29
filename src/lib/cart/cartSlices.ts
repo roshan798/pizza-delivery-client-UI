@@ -7,7 +7,7 @@ export interface Cart {
 	productName: string;
 	productImg?: string;
 	tenantId: string;
-	
+
 	base: {
 		name: string;
 		price: number;
@@ -23,12 +23,11 @@ export interface Cart {
 
 interface TenantCartGroup {
 	tenantId: string;
-	tenantName?: string;  
+	tenantName?: string;
 	items: Cart[];
 }
 
-type CartState = TenantCartGroup[];  // Array of tenant groups
-
+type CartState = TenantCartGroup[]; // Array of tenant groups
 
 // Helper to load state from localStorage (used by client-side initialization)
 const loadState = (): CartState => {
@@ -77,7 +76,9 @@ const cartSlice = createSlice({
 			console.log('Adding to cart:', newItem);
 
 			// Find existing tenant group or create new one
-			let tenantGroup = state.find(group => group.tenantId === newItem.tenantId);
+			let tenantGroup = state.find(
+				(group) => group.tenantId === newItem.tenantId
+			);
 
 			if (!tenantGroup) {
 				// Create new tenant group
@@ -86,7 +87,9 @@ const cartSlice = createSlice({
 			}
 
 			// Add/update item within tenant group
-			const existingItem = tenantGroup.items.find(item => item.key === newItem.key);
+			const existingItem = tenantGroup.items.find(
+				(item) => item.key === newItem.key
+			);
 			if (existingItem) {
 				existingItem.quantity += newItem.quantity || 1;
 			} else {
@@ -98,7 +101,9 @@ const cartSlice = createSlice({
 		incrementProductQuantity(state, action: PayloadAction<string>) {
 			const key = action.payload;
 			for (const group of state) {
-				const existingItem = group.items.find(item => item.key === key);
+				const existingItem = group.items.find(
+					(item) => item.key === key
+				);
 				if (existingItem) {
 					existingItem.quantity += 1;
 					saveState(state);
@@ -109,7 +114,9 @@ const cartSlice = createSlice({
 		decrementProductQuantity(state, action: PayloadAction<string>) {
 			const key = action.payload;
 			for (const group of state) {
-				const existingItemIndex = group.items.findIndex(item => item.key === key);
+				const existingItemIndex = group.items.findIndex(
+					(item) => item.key === key
+				);
 				if (existingItemIndex !== -1) {
 					const existingItem = group.items[existingItemIndex];
 					if (existingItem.quantity === 1) {
@@ -127,9 +134,14 @@ const cartSlice = createSlice({
 				}
 			}
 		},
-		removeFromCart(state, action: PayloadAction<{ tenantId: string; itemIndex: number }>) {
+		removeFromCart(
+			state,
+			action: PayloadAction<{ tenantId: string; itemIndex: number }>
+		) {
 			const { tenantId, itemIndex } = action.payload;
-			const tenantGroup = state.find(group => group.tenantId === tenantId);
+			const tenantGroup = state.find(
+				(group) => group.tenantId === tenantId
+			);
 			if (tenantGroup) {
 				tenantGroup.items.splice(itemIndex, 1);
 				if (tenantGroup.items.length === 0) {
@@ -152,10 +164,12 @@ const cartSlice = createSlice({
 export const selectCartGroups = (state: RootState) => state.cart;
 
 // Total items count
-export const selectTotalItems = createSelector(
-	[selectCartGroups],
-	(groups) => groups.reduce((total, group) =>
-		total + group.items.reduce((sum, item) => sum + item.quantity, 0), 0)
+export const selectTotalItems = createSelector([selectCartGroups], (groups) =>
+	groups.reduce(
+		(total, group) =>
+			total + group.items.reduce((sum, item) => sum + item.quantity, 0),
+		0
+	)
 );
 
 // Check if multi-tenant
@@ -168,7 +182,7 @@ export const selectIsMultiTenant = createSelector(
 export const selectItemsByTenant = createSelector(
 	[selectCartGroups, (_: RootState, tenantId: string) => tenantId],
 	(groups, tenantId) => {
-		const group = groups.find(g => g.tenantId === tenantId);
+		const group = groups.find((g) => g.tenantId === tenantId);
 		return group ? group.items : [];
 	}
 );
@@ -191,7 +205,7 @@ export const makeSelectProductsByProductId = () =>
 	createSelector(
 		[selectCartGroups, (_: RootState, productId: string) => productId],
 		(cartGroups, productId) => {
-			const allItems = cartGroups.flatMap(group => group.items);
+			const allItems = cartGroups.flatMap((group) => group.items);
 			return allItems.filter((item) => item.productId === productId);
 		}
 	);

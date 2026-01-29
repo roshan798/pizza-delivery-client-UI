@@ -45,7 +45,6 @@ export interface Customer {
 	updatedAt?: Date;
 }
 
-
 type FormData = {
 	customerId: string;
 	firstName: string;
@@ -55,7 +54,7 @@ type FormData = {
 	address: string;
 	city: string;
 	zip: string;
-	paymentMethod: "CASH" | "CARD";
+	paymentMethod: 'CASH' | 'CARD';
 	couponCode: string;
 };
 
@@ -144,17 +143,14 @@ export function CheckoutForm({ onFormChange }: CheckoutFormProps) {
 		setFormData((prev) => ({ ...prev, phone }));
 	};
 
-	const updatePayment = (paymentMethod: "CASH" | "CARD") => {
-
+	const updatePayment = (paymentMethod: 'CASH' | 'CARD') => {
 		setFormData((prev) => ({ ...prev, paymentMethod }));
 	};
 
 	const updateAddress = (address: string, city: string, zip: string) => {
-		console.debug("updateAddress", { address, city, zip })
+		console.debug('updateAddress', { address, city, zip });
 		setFormData((prev) => ({ ...prev, address, city, zip }));
 	};
-
-
 
 	if (loading) {
 		return (
@@ -201,7 +197,14 @@ export function CheckoutForm({ onFormChange }: CheckoutFormProps) {
 				<form className="space-y-6">
 					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 						<div className="space-y-2">
-							<input type="text" id="customerId" name='customerId' value={formData.customerId} hidden readOnly />
+							<input
+								type="text"
+								id="customerId"
+								name="customerId"
+								value={formData.customerId}
+								hidden
+								readOnly
+							/>
 							<Label htmlFor="firstName">First Name</Label>
 							<Input
 								id="firstName"

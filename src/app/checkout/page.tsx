@@ -18,7 +18,6 @@ const CheckoutPage = async ({ searchParams }: CheckoutPageProps) => {
 		redirect(`/`);
 	}
 
-
 	return <CheckoutClientPage tenantId={tenantId} />;
 };
 

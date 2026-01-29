@@ -19,8 +19,8 @@ import {
 
 interface CartItemProps {
 	item: Cart;
-	tenantId: string;  
-	itemIndex: number; 
+	tenantId: string;
+	itemIndex: number;
 }
 
 export function CartItem({ item, tenantId, itemIndex }: CartItemProps) {
@@ -100,7 +100,11 @@ export function CartItem({ item, tenantId, itemIndex }: CartItemProps) {
 								variant="ghost"
 								size="icon"
 								className="text-muted-foreground hover:text-destructive ml-2"
-								onClick={() => dispatch(removeFromCart({ tenantId, itemIndex }))}
+								onClick={() =>
+									dispatch(
+										removeFromCart({ tenantId, itemIndex })
+									)
+								}
 							>
 								<Trash2 className="h-4 w-4" />
 							</Button>

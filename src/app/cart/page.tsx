@@ -1,9 +1,6 @@
 'use client';
 
-import {
-	Card,
-	CardContent,
-} from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { setCart } from '@/lib/cart/cartSlices';
@@ -19,7 +16,8 @@ import { CartGroupItem } from './CartGroupItem'; // Import new component
 import { CartSummarySection } from './CartSummarySection'; // Import new component
 
 const CartPage = () => {
-	const [isLoadedFromLocalStorage, setIsLoadedFromLocalStorage] = useState(false);
+	const [isLoadedFromLocalStorage, setIsLoadedFromLocalStorage] =
+		useState(false);
 	const cartGroups = useAppSelector((state) => state.cart);
 	const isMultiTenant = useAppSelector(selectIsMultiTenant);
 	const dispatch = useAppDispatch();
@@ -34,40 +32,54 @@ const CartPage = () => {
 	const tenantEntities = useAppSelector((state) => state.tenants.tenants);
 
 	// Calculate totals per tenant group, ensuring tenantName is included
-	const tenantSummaries: TenantSummary[] = useMemo(() =>
-		cartGroups.map(group => {
-			const tenant = tenantEntities.find(t => t.id.toString() === group.tenantId.toString());
-			const tenantName = tenant ? tenant.name : group.tenantId;
-			const itemsTotal = group.items.reduce((sum, item) => {
-				const itemTotal = item.base.price +
-					item.toppings.reduce((s, t) => s + t.price, 0);
-				return sum + (itemTotal * item.quantity);
-			}, 0);
+	const tenantSummaries: TenantSummary[] = useMemo(
+		() =>
+			cartGroups.map((group) => {
+				const tenant = tenantEntities.find(
+					(t) => t.id.toString() === group.tenantId.toString()
+				);
+				const tenantName = tenant ? tenant.name : group.tenantId;
+				const itemsTotal = group.items.reduce((sum, item) => {
+					const itemTotal =
+						item.base.price +
+						item.toppings.reduce((s, t) => s + t.price, 0);
+					return sum + itemTotal * item.quantity;
+				}, 0);
 
-			const itemsCount = group.items.reduce((sum, item) => sum + item.quantity, 0);
-			const delivery = group.items.length ? 40 : 0;
-			const tax = Math.round(itemsTotal * 0.05);
-			const grandTotal = itemsTotal + delivery + tax;
+				const itemsCount = group.items.reduce(
+					(sum, item) => sum + item.quantity,
+					0
+				);
+				const delivery = group.items.length ? 40 : 0;
+				const tax = Math.round(itemsTotal * 0.05);
+				const grandTotal = itemsTotal + delivery + tax;
 
-			return {
-				...group,
-				tenantId: group.tenantId, // Ensure tenantId is explicitly included for TenantSummary type
-				tenantName,
-				itemsTotal,
-				itemsCount,
-				delivery,
-				tax,
-				grandTotal
-			};
-		}), [cartGroups, tenantEntities]
+				return {
+					...group,
+					tenantId: group.tenantId, // Ensure tenantId is explicitly included for TenantSummary type
+					tenantName,
+					itemsTotal,
+					itemsCount,
+					delivery,
+					tax,
+					grandTotal,
+				};
+			}),
+		[cartGroups, tenantEntities]
 	);
 
 	if (!isLoadedFromLocalStorage) {
 		return <CartLoading />;
 	}
 
-	const overallTotal = tenantSummaries.reduce((sum, summary) => sum + summary.grandTotal, 0);
-	const overallItemsCount = tenantSummaries.reduce((sum, summary) => sum + summary.itemsCount, 0);
+	const overallTotal = tenantSummaries.reduce(
+		(sum, summary) => sum + summary.grandTotal,
+		0
+	);
+	const overallItemsCount = tenantSummaries.reduce(
+		(sum, summary) => sum + summary.itemsCount,
+		0
+	);
 
 	if (!cartGroups.length) {
 		return <EmptyCart />;
@@ -77,14 +89,22 @@ const CartPage = () => {
 			{/* Left: Multi-tenant cart items */}
 			<Card className="flex-1">
 				{/* CartHeader component handles the top section */}
-				<CartHeader overallItemsCount={overallItemsCount} vendorCount={cartGroups.length} isMultiTenant={isMultiTenant} />
+				<CartHeader
+					overallItemsCount={overallItemsCount}
+					vendorCount={cartGroups.length}
+					isMultiTenant={isMultiTenant}
+				/>
 
 				<Separator className="my-4" />
 
 				<CardContent className="p-0">
 					<div className="px-4 py-2">
 						{cartGroups.map((group, groupIndex) => (
-							<CartGroupItem key={group.tenantId} group={group} summary={tenantSummaries[groupIndex]} />
+							<CartGroupItem
+								key={group.tenantId}
+								group={group}
+								summary={tenantSummaries[groupIndex]}
+							/>
 						))}
 					</div>
 				</CardContent>
@@ -92,7 +112,12 @@ const CartPage = () => {
 
 			{/* Right: Multi-tenant summary */}
 			{/* CartSummarySection component handles the right-hand summary */}
-			<CartSummarySection tenantSummaries={tenantSummaries} isMultiTenant={isMultiTenant} overallTotal={overallTotal} vendorCount={cartGroups.length} />
+			<CartSummarySection
+				tenantSummaries={tenantSummaries}
+				isMultiTenant={isMultiTenant}
+				overallTotal={overallTotal}
+				vendorCount={cartGroups.length}
+			/>
 		</div>
 	);
 };
