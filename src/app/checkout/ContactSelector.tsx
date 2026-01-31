@@ -84,7 +84,7 @@ export default function ContactSelector({
 				setSelectedContactId(newContact._id!);
 				onPhoneChange(newContact.contact);
 				setShowNewContactDialog(false);
-
+				window.location.reload();
 				setNewContactForm(INTIAL_STATE);
 			}
 		} catch (error) {

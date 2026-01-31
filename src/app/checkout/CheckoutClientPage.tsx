@@ -1,5 +1,5 @@
 'use client';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
 import { useEffect, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '@/lib/hooks';
 import { loadState, setCart } from '@/lib/cart/cartSlices';
@@ -8,10 +8,14 @@ import { CheckoutForm } from './CheckoutForm';
 import { useToast } from '@/components/ui/toast';
 import { CheckoutSummary } from './CheckoutSummary';
 import CONFIG from '@/config';
+import * as uuid from 'uuid';
 
 interface CheckoutClientPageProps {
 	tenantId: string;
 }
+type OrderResponse = {
+	paymentUrl: string;
+};
 
 const CheckoutClientPage = ({ tenantId }: CheckoutClientPageProps) => {
 	const cartGroups = useAppSelector((state) => state.cart);
@@ -19,6 +23,7 @@ const CheckoutClientPage = ({ tenantId }: CheckoutClientPageProps) => {
 	const [isLoadedFromLocalStorage, setIsLoadedFromLocalStorage] =
 		useState(false);
 	const { toast } = useToast();
+	const idempotancyKeyRef = useRef('');
 
 	const [formData, setFormData] = useState({
 		customerId: '',
@@ -107,9 +112,13 @@ const CheckoutClientPage = ({ tenantId }: CheckoutClientPageProps) => {
 			})),
 			key: item.key!,
 		}));
+		if (idempotancyKeyRef.current === '') {
+			idempotancyKeyRef.current = uuid.v4() + formData.customerId;
+		}
 
 		const orderData: CreateOrderRequest = {
 			customerId: formData.customerId,
+			tenantId: tenantId,
 			address: `${formData.address}, ${formData.city}, ${formData.zip}`,
 			phone: formData.phone,
 			paymentMode: formData.paymentMethod,
@@ -128,7 +137,10 @@ const CheckoutClientPage = ({ tenantId }: CheckoutClientPageProps) => {
 				CONFIG.baseUrl + CONFIG.order.url + '/orders',
 				{
 					method: 'POST',
-					headers: { 'Content-Type': 'application/json' },
+					headers: {
+						'Content-Type': 'application/json',
+						'idempotency-key': idempotancyKeyRef.current,
+					},
 					credentials: 'include',
 					body: JSON.stringify(orderData),
 				}
@@ -136,16 +148,17 @@ const CheckoutClientPage = ({ tenantId }: CheckoutClientPageProps) => {
 
 			if (!res.ok) throw new Error(`Order failed: ${res.status}`);
 
-			const result = await res.json();
+			const result: OrderResponse = await res.json();
 			toast({
 				title: 'Order Placed!',
-				description: `Your order from ${tenantGroup.tenantName || tenantId} has been placed successfully!`,
+				description: `Your order has been placed successfully!`,
 				variant: 'success',
 			});
 
 			console.log('Order created:', result);
-			// dispatch(clearCart()); // Clear specific tenant group instead
-			// router.push('/order-confirmation');
+			//dispatch(clearCartByTenantId(tenantId));
+			window.location.href = result.paymentUrl;
+			//
 		} catch (error) {
 			toast({
 				title: 'Order Failed',
@@ -154,7 +167,7 @@ const CheckoutClientPage = ({ tenantId }: CheckoutClientPageProps) => {
 			});
 			console.error('Order error:', error);
 		}
-	}, [formData, tenantGroup, tenantId, itemsTotal, grandTotal, toast]);
+	}, [formData]);
 
 	if (!isLoadedFromLocalStorage) {
 		return <CartLoading />;
@@ -208,6 +221,7 @@ export default CheckoutClientPage;
 // Client-to-Server Order Request Type (exact match to your JSON)
 export interface CreateOrderRequest {
 	customerId: string;
+	tenantId: string;
 	address: string;
 	phone: string;
 	paymentMode: 'CASH' | 'CARD';

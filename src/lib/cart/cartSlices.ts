@@ -157,6 +157,18 @@ const cartSlice = createSlice({
 			saveState(newState);
 			return newState;
 		},
+		clearCartByTenantId(state, action: PayloadAction<string>) {
+			const tenantId = action.payload;
+
+			const tenantGroupIndex = state.findIndex(
+				(group) => group.tenantId === tenantId
+			);
+
+			if (tenantGroupIndex !== -1) {
+				state.splice(tenantGroupIndex, 1);
+				saveState(state);
+			}
+		},
 	},
 });
 
@@ -217,6 +229,7 @@ export const {
 	setCart,
 	incrementProductQuantity,
 	decrementProductQuantity,
+	clearCartByTenantId,
 } = cartSlice.actions;
 
 export default cartSlice.reducer;

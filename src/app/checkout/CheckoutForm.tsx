@@ -97,13 +97,19 @@ export function CheckoutForm({ onFormChange }: CheckoutFormProps) {
 				const data = await response.json();
 				if (response.ok) {
 					setCustomer(data.customer);
-					const primaryAddress = data.customer.address.find(
+					let primaryAddress = data.customer.address.find(
 						(addr: Address) => addr.isPrimary
 					);
-					const primaryContact = data.customer.Contact.find(
+					if (!primaryAddress && data.customer.address.length > 0) {
+						primaryAddress = data.customer.address[0];
+					}
+
+					let primaryContact = data.customer.Contact.find(
 						(contact: Contact) => contact.isPrimary
 					);
-					// console.log({ primaryAddress, primaryContact });
+					if (!primaryContact && data.customer.Contact.length > 0) {
+						primaryContact = data.customer.Contact[0];
+					}
 					setFormData((prev) => ({
 						...prev,
 						customerId: data.customer._id,
@@ -133,13 +139,11 @@ export function CheckoutForm({ onFormChange }: CheckoutFormProps) {
 		e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
 	) => {
 		const { id, value } = e.target;
-		// console.debug("handleChange", { id, value })
 		setFormData((prev) => ({ ...prev, [id]: value }));
 	};
 
 	const updatePhone = (phone: string) => {
-		// console.debug("updatePhone", { phone })
-
+		console.log('update Phone ', phone);
 		setFormData((prev) => ({ ...prev, phone }));
 	};
 
@@ -148,7 +152,6 @@ export function CheckoutForm({ onFormChange }: CheckoutFormProps) {
 	};
 
 	const updateAddress = (address: string, city: string, zip: string) => {
-		console.debug('updateAddress', { address, city, zip });
 		setFormData((prev) => ({ ...prev, address, city, zip }));
 	};
 
