@@ -7,11 +7,13 @@ import { Label } from '@/components/ui/label';
 type CouponSectionProps = {
 	couponCode: string;
 	onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+	isPending: boolean;
 };
 
 export default function CouponSection({
 	couponCode,
 	onChange,
+	isPending,
 }: CouponSectionProps) {
 	return (
 		<div className="space-y-2">
@@ -22,9 +24,9 @@ export default function CouponSection({
 					placeholder="Enter coupon code"
 					value={couponCode}
 					onChange={onChange}
-					disabled
+					disabled={isPending}
 				/>
-				<Button type="button" disabled>
+				<Button type="button" disabled={isPending}>
 					Apply
 				</Button>
 			</div>

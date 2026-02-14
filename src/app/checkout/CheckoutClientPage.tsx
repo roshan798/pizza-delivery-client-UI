@@ -2,20 +2,18 @@
 import React, { useCallback, useMemo, useRef } from 'react';
 import { useEffect, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '@/lib/hooks';
-import { loadState, setCart } from '@/lib/cart/cartSlices';
+import { clearCartByTenantId, loadState, setCart } from '@/lib/cart/cartSlices';
 import { CartLoading } from '../cart/CartLoading';
 import { CheckoutForm } from './CheckoutForm';
 import { useToast } from '@/components/ui/toast';
 import { CheckoutSummary } from './CheckoutSummary';
-import CONFIG from '@/config';
 import * as uuid from 'uuid';
+import { OrderItemRequest, CreateOrderRequest } from './order-types';
+import { FormData as CheckoutFormData } from './useCheckoutForm';
 
 interface CheckoutClientPageProps {
 	tenantId: string;
 }
-type OrderResponse = {
-	paymentUrl: string;
-};
 
 const CheckoutClientPage = ({ tenantId }: CheckoutClientPageProps) => {
 	const cartGroups = useAppSelector((state) => state.cart);
@@ -36,7 +34,8 @@ const CheckoutClientPage = ({ tenantId }: CheckoutClientPageProps) => {
 		zip: '',
 		paymentMethod: 'CASH' as 'CASH' | 'CARD',
 		couponCode: '',
-	});
+	} as CheckoutFormData);
+	const [isPending, setIsPending] = useState(false);
 
 	useEffect(() => {
 		const storedCart = loadState();
@@ -52,7 +51,7 @@ const CheckoutClientPage = ({ tenantId }: CheckoutClientPageProps) => {
 		[cartGroups, tenantId]
 	);
 
-	const handleFormChange = useCallback((data: typeof formData) => {
+	const handleFormChange = useCallback((data: CheckoutFormData) => {
 		setFormData(data);
 	}, []);
 
@@ -91,11 +90,11 @@ const CheckoutClientPage = ({ tenantId }: CheckoutClientPageProps) => {
 			return;
 		}
 
-		console.log(`Placing order for tenant: ${tenantId}`, {
-			formData,
-			itemsTotal,
-			grandTotal,
-		});
+		// console.log(`Placing order for tenant: ${tenantId}`, {
+		// 	formData,
+		// 	itemsTotal,
+		// 	grandTotal,
+		// });
 
 		const items: OrderItemRequest[] = tenantGroup.items.map((item) => ({
 			productId: item.productId,
@@ -133,22 +132,22 @@ const CheckoutClientPage = ({ tenantId }: CheckoutClientPageProps) => {
 		};
 
 		try {
-			const res = await fetch(
-				CONFIG.baseUrl + CONFIG.order.url + '/orders',
-				{
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-						'idempotency-key': idempotancyKeyRef.current,
-					},
-					credentials: 'include',
-					body: JSON.stringify(orderData),
-				}
-			);
+			setIsPending(true);
+			// Make a fetch call to the Next.js API route
+			const res = await fetch('/api/order/create-order', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					'idempotency-key': idempotancyKeyRef.current, // Pass idempotency key in headers
+				},
+				body: JSON.stringify(orderData),
+			});
 
-			if (!res.ok) throw new Error(`Order failed: ${res.status}`);
-
-			const result: OrderResponse = await res.json();
+			if (!res.ok)
+				throw new Error(
+					`Order failed: ${res.status} - ${await res.text()}`
+				);
+			const result: { paymentUrl?: string } = await res.json();
 			toast({
 				title: 'Order Placed!',
 				description: `Your order has been placed successfully!`,
@@ -156,8 +155,13 @@ const CheckoutClientPage = ({ tenantId }: CheckoutClientPageProps) => {
 			});
 
 			console.log('Order created:', result);
-			//dispatch(clearCartByTenantId(tenantId));
-			window.location.href = result.paymentUrl;
+			if (result.paymentUrl) {
+				window.location.href = result.paymentUrl;
+			} else {
+				window.location.href = '/';
+			}
+			dispatch(clearCartByTenantId(tenantId));
+			// The API route now guarantees paymentUrl is always a string (either Stripe URL or default confirmation URL)
 			//
 		} catch (error) {
 			toast({
@@ -166,39 +170,34 @@ const CheckoutClientPage = ({ tenantId }: CheckoutClientPageProps) => {
 				variant: 'error',
 			});
 			console.error('Order error:', error);
+		} finally {
+			setIsPending(false);
 		}
-	}, [formData]);
+	}, [
+		dispatch,
+		formData,
+		grandTotal,
+		itemsTotal,
+		tenantGroup,
+		tenantId,
+		toast,
+	]);
 
 	if (!isLoadedFromLocalStorage) {
 		return <CartLoading />;
 	}
 
 	if (!tenantGroup || !tenantGroup.items.length) {
-		return (
-			<div className="mx-auto max-w-2xl py-12 px-4">
-				<div className="text-center">
-					<h1 className="text-2xl font-bold text-gray-900 mb-4">
-						No Items Found
-					</h1>
-					<p className="text-muted-foreground mb-8 max-w-md mx-auto">
-						No items found for vendor {tenantId}. Please check your
-						cart and try again.
-					</p>
-					<a
-						href="/cart"
-						className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-					>
-						← Back to Cart
-					</a>
-				</div>
-			</div>
-		);
+		return <NoItemsFound tenantId={tenantId} />;
 	}
 
 	return (
 		<div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-6 lg:flex-row">
 			{/* Left: Checkout Form */}
-			<CheckoutForm onFormChange={handleFormChange} />
+			<CheckoutForm
+				onFormChange={handleFormChange}
+				isPending={isPending}
+			/>
 
 			{/* Right: Order Summary */}
 			<CheckoutSummary
@@ -208,6 +207,7 @@ const CheckoutClientPage = ({ tenantId }: CheckoutClientPageProps) => {
 				discount={0}
 				grandTotal={grandTotal}
 				itemsCount={itemsCount}
+				isPending={isPending}
 				tenantName={tenantGroup.tenantName || tenantId}
 				onPlaceOrder={handlePlaceOrder}
 			/>
@@ -217,39 +217,24 @@ const CheckoutClientPage = ({ tenantId }: CheckoutClientPageProps) => {
 
 export default CheckoutClientPage;
 
-// TODO : Move below code to type file
-// Client-to-Server Order Request Type (exact match to your JSON)
-export interface CreateOrderRequest {
-	customerId: string;
-	tenantId: string;
-	address: string;
-	phone: string;
-	paymentMode: 'CASH' | 'CARD';
-	couponCode?: string;
-	subTotal: number;
-	tax: number;
-	deliveryCharge: number;
-	delivery: number;
-	discount: number;
-	grandTotal: number;
-
-	items: OrderItemRequest[];
-}
-
-export interface OrderItemRequest {
-	productId: string;
-	productName: string;
-	quantity: number;
-	base: {
-		name: string;
-		price: number;
-	};
-	toppings: ToppingRequest[];
-	key: string;
-}
-
-export interface ToppingRequest {
-	id: string;
-	name: string;
-	price: number;
-}
+const NoItemsFound = ({ tenantId }: { tenantId: string }) => {
+	return (
+		<div className="mx-auto max-w-2xl py-12 px-4">
+			<div className="text-center">
+				<h1 className="text-2xl font-bold text-gray-900 mb-4">
+					No Items Found
+				</h1>
+				<p className="text-muted-foreground mb-8 max-w-md mx-auto">
+					No items found for vendor {tenantId}. Please check your cart
+					and try again.
+				</p>
+				<a
+					href="/cart"
+					className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+				>
+					← Back to Cart
+				</a>
+			</div>
+		</div>
+	);
+};

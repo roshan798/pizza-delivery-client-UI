@@ -32,6 +32,7 @@ type Contact = {
 type ContactSelectorProps = {
 	contacts: Contact[];
 	onPhoneChange: (phone: string) => void;
+	isPending: boolean;
 };
 
 const NEW_CONTACT_ID = 'newContact';
@@ -39,6 +40,7 @@ const NEW_CONTACT_ID = 'newContact';
 export default function ContactSelector({
 	contacts,
 	onPhoneChange,
+	isPending,
 }: ContactSelectorProps) {
 	const [selectedContactId, setSelectedContactId] = useState<string>();
 	const [showNewContactDialog, setShowNewContactDialog] = useState(false);
@@ -115,6 +117,7 @@ export default function ContactSelector({
 							<RadioGroupItem
 								id={cont._id!}
 								value={cont._id!}
+								disabled={isPending}
 								className="self-center"
 							/>
 							<span className="flex-grow ml-2 font-medium">
@@ -134,6 +137,7 @@ export default function ContactSelector({
 						<RadioGroupItem
 							id={NEW_CONTACT_ID}
 							value={NEW_CONTACT_ID}
+							disabled={isPending}
 							className="self-center"
 						/>
 						<span className="flex-grow ml-2 font-medium">
@@ -161,7 +165,7 @@ export default function ContactSelector({
 								id="countryCode"
 								value={newContactForm.countryCode}
 								onChange={handleNewContactChange}
-								disabled
+								disabled={isPending}
 							/>
 						</div>
 						<div className="space-y-2">
@@ -169,8 +173,10 @@ export default function ContactSelector({
 							<Input
 								id="contact"
 								type="tel"
+								required
 								value={newContactForm.contact}
 								onChange={handleNewContactChange}
+								disabled={isPending}
 							/>
 						</div>
 					</div>
@@ -180,7 +186,11 @@ export default function ContactSelector({
 							variant="outline"
 							onClick={() => setShowNewContactDialog(false)}
 						>
-							Cancel
+							Cancel{' '}
+						</Button>
+						<Button onClick={saveNewContact} disabled={isPending}>
+							{' '}
+							Save Phone
 						</Button>
 						<Button onClick={saveNewContact}>Save Phone</Button>
 					</DialogFooter>

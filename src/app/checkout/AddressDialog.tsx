@@ -40,6 +40,7 @@ type AddressDialogProps = {
 	initialData: AddressFormData;
 	onSave: (data: AddressFormData) => Promise<void>;
 	isEdit?: boolean;
+	isPending?: boolean; // Added isPending prop
 	onDelete?: (addressId: string) => Promise<void>; // ✅ New prop for delete
 	addressId?: string; // ✅ Address ID for delete
 };
@@ -51,6 +52,7 @@ export default function AddressDialog({
 	initialData,
 	onSave,
 	isEdit = false,
+	isPending = false, // Default to false
 	addressId,
 	onDelete,
 }: AddressDialogProps) {
@@ -107,6 +109,7 @@ export default function AddressDialog({
 								id="address"
 								value={formData.address}
 								onChange={handleChange}
+								disabled={isPending}
 								placeholder="Enter full address"
 							/>
 						</div>
@@ -117,6 +120,7 @@ export default function AddressDialog({
 									id="city"
 									value={formData.city}
 									onChange={handleChange}
+									disabled={isPending}
 									placeholder="Enter city"
 								/>
 							</div>
@@ -126,6 +130,7 @@ export default function AddressDialog({
 									id="zipCode"
 									value={formData.zipCode}
 									onChange={handleChange}
+									disabled={isPending}
 									placeholder="Enter zip code"
 								/>
 							</div>
@@ -140,12 +145,14 @@ export default function AddressDialog({
 								<div className="flex items-center space-x-2">
 									<RadioGroupItem
 										value="true"
+										disabled={isPending}
 										id="primary-yes"
 									/>
 									<Label htmlFor="primary-yes">Yes</Label>
 								</div>
 								<div className="flex items-center space-x-2">
 									<RadioGroupItem
+										disabled={isPending}
 										value="false"
 										id="primary-no"
 									/>
@@ -160,7 +167,8 @@ export default function AddressDialog({
 								onClick={handleSave}
 								disabled={
 									!formData.address.trim() ||
-									!formData.city.trim()
+									!formData.city.trim() ||
+									isPending
 								}
 								className="flex-1 sm:flex-none"
 							>
@@ -171,6 +179,7 @@ export default function AddressDialog({
 								type="button"
 								variant="outline"
 								onClick={() => onOpenChange(false)}
+								disabled={isPending}
 								className="flex-1 sm:flex-none"
 							>
 								Cancel
@@ -181,6 +190,7 @@ export default function AddressDialog({
 									type="button"
 									variant="destructive"
 									size="sm"
+									disabled={isPending}
 									onClick={() => setShowDeleteConfirm(true)}
 									className="h-9 gap-2 flex-1 sm:flex-none"
 								>

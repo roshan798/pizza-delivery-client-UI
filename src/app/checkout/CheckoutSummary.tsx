@@ -20,13 +20,21 @@ type CheckoutSummaryProps = {
 	grandTotal: number;
 	onPlaceOrder: () => void;
 	tenantName: string;
+	isPending: boolean;
 	itemsCount: number;
 };
 
 export function CheckoutSummary(props: CheckoutSummaryProps) {
 	// Props are now directly passed from CheckoutPage
-	const { itemsTotal, delivery, tax, discount, grandTotal, onPlaceOrder } =
-		props;
+	const {
+		itemsTotal,
+		delivery,
+		tax,
+		discount,
+		grandTotal,
+		onPlaceOrder,
+		isPending,
+	} = props;
 
 	return (
 		<Card className="w-full lg:max-w-sm self-start">
@@ -73,7 +81,11 @@ export function CheckoutSummary(props: CheckoutSummaryProps) {
 				</div>
 			</CardContent>
 			<CardFooter className="flex flex-col gap-2">
-				<Button className="w-full" onClick={onPlaceOrder}>
+				<Button
+					className="w-full"
+					onClick={onPlaceOrder}
+					disabled={isPending}
+				>
 					Place Order
 				</Button>
 			</CardFooter>

@@ -18,6 +18,7 @@ type Address = {
 type AddressSelectorProps = {
 	addresses: Address[];
 	onAddressChange: (address: string, city: string, zip: string) => void;
+	isPending: boolean;
 };
 
 type AddressFormData = {
@@ -32,6 +33,7 @@ const NEW_ADDRESS_ID = 'newAddress';
 export default function AddressSelector({
 	addresses,
 	onAddressChange,
+	isPending,
 }: AddressSelectorProps) {
 	const [selectedAddressId, setSelectedAddressId] = useState<string>('');
 	const [showNewDialog, setShowNewDialog] = useState(false);
@@ -146,6 +148,7 @@ export default function AddressSelector({
 								<RadioGroupItem
 									id={addr._id}
 									value={addr._id}
+									disabled={isPending}
 									className="self-center"
 								/>
 								<div className="flex flex-col justify-center flex-grow gap-1 ml-2">
@@ -173,6 +176,7 @@ export default function AddressSelector({
 						<RadioGroupItem
 							id={NEW_ADDRESS_ID}
 							value={NEW_ADDRESS_ID}
+							disabled={isPending}
 							className="self-center"
 						/>
 						<span className="flex-grow ml-2 font-medium">
@@ -217,6 +221,7 @@ export default function AddressSelector({
 								}
 					}
 					onSave={updateAddress}
+					isPending={isPending}
 					isEdit={true}
 					addressId={editingAddressId!}
 					onDelete={async (addressId) => {

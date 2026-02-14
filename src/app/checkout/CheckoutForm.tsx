@@ -16,6 +16,7 @@ import ContactSelector from './ContactSelector';
 import AddressSelector from './AddressSelector';
 import CouponSection from './CouponSection';
 import PaymentSelector from './PaymentSelector';
+import { useCheckoutForm, FormData } from './useCheckoutForm'; // Import the new hook and types
 
 // Types remain the same
 type Address = {
@@ -33,7 +34,13 @@ type Contact = {
 	isPrimary: boolean;
 };
 
+interface CheckoutFormProps {
+	onFormChange: (data: FormData) => void;
+	isPending: boolean;
+}
+
 export interface Customer {
+	// This type should remain here or be moved to a shared types file
 	_id?: string;
 	userId: string;
 	firstName: string;
@@ -45,45 +52,22 @@ export interface Customer {
 	updatedAt?: Date;
 }
 
-type FormData = {
-	customerId: string;
-	firstName: string;
-	lastName: string;
-	email: string;
-	phone: string;
-	address: string;
-	city: string;
-	zip: string;
-	paymentMethod: 'CASH' | 'CARD';
-	couponCode: string;
-};
-
-interface CheckoutFormProps {
-	onFormChange: (data: FormData) => void;
-}
-
-const initialFormData: FormData = {
-	customerId: '',
-	firstName: '',
-	lastName: '',
-	email: '',
-	phone: '',
-	address: '',
-	city: '',
-	zip: '',
-	paymentMethod: 'CASH',
-	couponCode: '',
-};
-
-export function CheckoutForm({ onFormChange }: CheckoutFormProps) {
-	const [formData, setFormData] = useState<FormData>(initialFormData);
+export function CheckoutForm({ onFormChange, isPending }: CheckoutFormProps) {
+	const {
+		formData,
+		handleChange,
+		updatePhone,
+		updatePayment,
+		updateAddress,
+		initializeFormData,
+	} = useCheckoutForm();
 	const [customer, setCustomer] = useState<Customer | null>(null);
 	const [loading, setLoading] = useState(true);
 
 	useEffect(() => {
 		const fetchCustomer = async () => {
 			try {
-				setLoading(true); // Set loading to true at start
+				setLoading(true);
 				const response = await fetch(
 					CONFIG.baseUrl + CONFIG.order.customer.url,
 					{
@@ -110,8 +94,8 @@ export function CheckoutForm({ onFormChange }: CheckoutFormProps) {
 					if (!primaryContact && data.customer.Contact.length > 0) {
 						primaryContact = data.customer.Contact[0];
 					}
-					setFormData((prev) => ({
-						...prev,
+					initializeFormData({
+						// Use initializeFormData from the hook
 						customerId: data.customer._id,
 						firstName: data.customer.firstName,
 						lastName: data.customer.lastName,
@@ -120,7 +104,7 @@ export function CheckoutForm({ onFormChange }: CheckoutFormProps) {
 						address: primaryAddress?.address || '',
 						city: primaryAddress?.city || '',
 						zip: primaryAddress?.zipCode || '',
-					}));
+					});
 				}
 			} catch (error) {
 				console.error('Error fetching customer:', error);
@@ -130,30 +114,9 @@ export function CheckoutForm({ onFormChange }: CheckoutFormProps) {
 		};
 		fetchCustomer();
 	}, []);
-
 	useEffect(() => {
 		onFormChange(formData);
 	}, [formData, onFormChange]);
-
-	const handleChange = (
-		e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-	) => {
-		const { id, value } = e.target;
-		setFormData((prev) => ({ ...prev, [id]: value }));
-	};
-
-	const updatePhone = (phone: string) => {
-		console.log('update Phone ', phone);
-		setFormData((prev) => ({ ...prev, phone }));
-	};
-
-	const updatePayment = (paymentMethod: 'CASH' | 'CARD') => {
-		setFormData((prev) => ({ ...prev, paymentMethod }));
-	};
-
-	const updateAddress = (address: string, city: string, zip: string) => {
-		setFormData((prev) => ({ ...prev, address, city, zip }));
-	};
 
 	if (loading) {
 		return (
@@ -215,6 +178,7 @@ export function CheckoutForm({ onFormChange }: CheckoutFormProps) {
 								value={formData.firstName}
 								onChange={handleChange}
 								required
+								disabled={isPending}
 							/>
 						</div>
 						<div className="space-y-2">
@@ -224,6 +188,7 @@ export function CheckoutForm({ onFormChange }: CheckoutFormProps) {
 								placeholder="John Doe"
 								value={formData.lastName}
 								onChange={handleChange}
+								disabled={isPending}
 								required
 							/>
 						</div>
@@ -236,7 +201,7 @@ export function CheckoutForm({ onFormChange }: CheckoutFormProps) {
 								value={formData.email}
 								onChange={handleChange}
 								required
-								disabled
+								disabled={true} // Email is always disabled as it's fetched
 							/>
 						</div>
 					</div>
@@ -244,21 +209,25 @@ export function CheckoutForm({ onFormChange }: CheckoutFormProps) {
 					<ContactSelector
 						contacts={customer?.Contact || []}
 						onPhoneChange={updatePhone}
+						isPending={isPending}
 					/>
 
 					<AddressSelector
 						addresses={customer?.address || []}
 						onAddressChange={updateAddress}
+						isPending={isPending}
 					/>
 
 					<CouponSection
 						couponCode={formData.couponCode}
 						onChange={handleChange}
+						isPending={isPending}
 					/>
 
 					<PaymentSelector
 						paymentMethod={formData.paymentMethod}
 						onChange={updatePayment}
+						isPending={isPending}
 					/>
 				</form>
 			</CardContent>

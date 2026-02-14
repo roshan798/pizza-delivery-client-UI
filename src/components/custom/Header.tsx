@@ -46,12 +46,14 @@ export default async function Header() {
 						>
 							Offers
 						</Link>
-						<Link
-							href="/contact"
-							className="text-sm font-medium text-gray-700 hover:text-primary"
-						>
-							Contact
-						</Link>
+						{session && (
+							<Link
+								href="/orders"
+								className="text-sm font-medium text-gray-700 hover:text-primary"
+							>
+								Orders
+							</Link>
+						)}
 					</nav>
 					<ClientCartIconWrapper />{' '}
 					{/* Use the client wrapper here */}
