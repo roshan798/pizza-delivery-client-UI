@@ -147,7 +147,7 @@ const CheckoutClientPage = ({ tenantId }: CheckoutClientPageProps) => {
 				throw new Error(
 					`Order failed: ${res.status} - ${await res.text()}`
 				);
-			const result: { paymentUrl?: string } = await res.json();
+			const result: { paymentUrl?: string, orderId?: string } = await res.json();
 			toast({
 				title: 'Order Placed!',
 				description: `Your order has been placed successfully!`,
@@ -157,8 +157,12 @@ const CheckoutClientPage = ({ tenantId }: CheckoutClientPageProps) => {
 			console.log('Order created:', result);
 			if (result.paymentUrl) {
 				window.location.href = result.paymentUrl;
-			} else {
-				window.location.href = '/';
+			} else if (result.orderId) {
+				window.location.href = '/orders/' + result.orderId;
+			}
+			else {
+				window.location.href = '/orders';
+
 			}
 			dispatch(clearCartByTenantId(tenantId));
 			// The API route now guarantees paymentUrl is always a string (either Stripe URL or default confirmation URL)
