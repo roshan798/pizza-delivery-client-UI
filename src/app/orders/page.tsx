@@ -30,9 +30,9 @@ import {
 } from 'lucide-react';
 
 async function getCustomerOrders(): Promise<OrderResponseDto[]> {
-	const URL = CONFIG.baseUrl + CONFIG.order.url + '/orders';
+	const URL = CONFIG.baseUrl + CONFIG.order.url + '/orders/getMine';
 	const cookieStore = await cookies();
-	console.log(cookieStore.get('accessToken'));
+	console.log(cookieStore.get('accessToken'),URL);
 	const accessTokenCookie = cookieStore.get('accessToken')?.value;
 	try {
 		const headers = new Headers();

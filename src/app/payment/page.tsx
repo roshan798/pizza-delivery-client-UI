@@ -4,7 +4,8 @@ import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import CONFIG from '@/config';
-import { OrderResponseDto } from '@/types/order-types';
+import PaymentErrorPage from './PaymentErrorPage';
+
 
 interface Topping {
 	id: string;
@@ -107,14 +108,14 @@ const PaymentStatusPage = () => {
 					const fetchedOrder = await getOrderById(orderId);
 					console.log(fetchedOrder);
 					if (!fetchedOrder) {
-						setError('Order not found');
+						setError('Failed to fetch order');
 						return;
 					}
 					setOrderData(fetchedOrder);
 				}
-			} catch (error) {
-				setError('Failed to fetch order');
-				console.error(error);
+			} catch (err) {
+				const error = err as Error;
+				setError(error.message || 'Failed to fetch order');
 			} finally {
 				setLoading(false);
 			}
@@ -131,12 +132,12 @@ const PaymentStatusPage = () => {
 			</div>
 		);
 	}
+	console.log(error)
 
 	if (error) {
 		return (
-			<div className="flex items-center justify-center min-h-screen bg-red-100 text-red-700 p-4">
-				<p className="text-lg">Error: {error}</p>
-			</div>
+			<PaymentErrorPage message={error} />
+
 		);
 	}
 

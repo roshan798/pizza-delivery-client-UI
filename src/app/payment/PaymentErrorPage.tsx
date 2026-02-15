@@ -2,23 +2,23 @@ import React from 'react';
 import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Package, ChevronLeft } from 'lucide-react';
+import { TriangleAlert, ChevronLeft } from 'lucide-react';
 
-interface OrderNotFoundProps {
+interface PaymentErrorPageProps {
     message?: string; // Optional message prop
 }
 
-const OrderNotFound: React.FC<OrderNotFoundProps> = ({ message }) => {
-    const defaultMessage = "We couldn't find this order or you don't have permission to view it.";
+const PaymentErrorPage: React.FC<PaymentErrorPageProps> = ({ message }) => {
+    const defaultMessage = "We encountered an issue processing your payment or fetching order details. Please try again or contact support.";
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50 flex items-center justify-center">
+        <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-red-50 flex items-center justify-center">
             <div className="container mx-auto px-4 max-w-2xl">
                 <Card className="border-2 shadow-lg">
                     <CardContent className="p-12 text-center">
-                        <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-slate-100 flex items-center justify-center">
-                            <Package className="w-10 h-10 text-slate-400" />
+                        <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-red-100 flex items-center justify-center">
+                            <TriangleAlert className="w-10 h-10 text-red-500" />
                         </div>
-                        <h1 className="text-3xl font-bold mb-3 text-slate-900">Order Not Found</h1>
+                        <h1 className="text-3xl font-bold mb-3 text-red-800">Payment Error</h1>
                         <p className="text-slate-600 mb-8 text-lg leading-relaxed">
                             {message || defaultMessage}
                         </p>
@@ -35,4 +35,4 @@ const OrderNotFound: React.FC<OrderNotFoundProps> = ({ message }) => {
     );
 };
 
-export default OrderNotFound;
+export default PaymentErrorPage;
