@@ -73,7 +73,6 @@ export default async function HomePage({
 	});
 
 	const { items: products, metadata } = productsRes.data;
-	// console.log('Products fetched on HomePage:', products);
 	// If your API returns { meta: {...} } adjust accordingly.
 	const totalItems = metadata?.totalItems ?? 0;
 	const totalPages =

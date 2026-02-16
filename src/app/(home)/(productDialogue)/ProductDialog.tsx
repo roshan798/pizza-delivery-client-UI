@@ -27,13 +27,20 @@ import { useAppDispatch, useAppSelector } from '@/lib/hooks';
 import { useToast } from '@/components/ui/toast';
 import Toppings from './Toppings';
 import PriceBreakdown from './PriceBreakdown';
+import { Checkbox } from '@/components/ui/checkbox';
 
 function parseBase(pc?: Map<string, PriceConfiguration>) {
 	const bases: { key: string; price: number }[] = [];
-	if (!pc) return bases;
+	const additionals: { key: string, price: number }[] = []
+	if (!pc) return { bases, additionals };
 
 	for (const [key, cfg] of Object.entries(pc)) {
-		if (cfg.priceType !== 'base') continue;
+		if (cfg.priceType === 'additional') {
+			const price = Object.values(cfg.availableOptions ?? {})[0];
+			const first = typeof price === 'number' ? price : 0
+			additionals.push({ key, price: first })
+			continue;
+		};
 		const first = Object.values(cfg.availableOptions ?? {})[0];
 		const price = typeof first === 'number' ? first : 0;
 		bases.push({ key, price });
@@ -46,7 +53,7 @@ function parseBase(pc?: Map<string, PriceConfiguration>) {
 		return (ia === -1 ? 999 : ia) - (ib === -1 ? 999 : ib);
 	});
 
-	return bases;
+	return { bases, additionals };
 }
 
 export function ProductDialog({
@@ -63,7 +70,7 @@ export function ProductDialog({
 	const dispatch = useAppDispatch();
 	const router = useRouter();
 	const { toast } = useToast();
-	const bases = useMemo(
+	const { bases, additionals } = useMemo(
 		() => parseBase(product.priceConfiguration),
 		[product.priceConfiguration]
 	);
@@ -71,6 +78,9 @@ export function ProductDialog({
 		bases[0] ?? { key: 'medium', price: 0 };
 	const [size, setSize] = useState<string>(defaultBase.key);
 	const [addons, setAddons] = useState<(Topping & { checked: boolean })[]>(
+		[]
+	);
+	const [selectedAdditionals, setSelectedAdditionals] = useState<string[]>(
 		[]
 	);
 
@@ -102,12 +112,19 @@ export function ProductDialog({
 			name: size,
 			price: basePrice,
 		};
-		const toppings = addons
+		const selectedToppings = addons
 			.filter((t) => t.checked)
 			.map((t) => ({
 				id: t.id,
 				name: t.name,
 				price: t.price,
+			}));
+		const selectedProductAdditionals = additionals
+			.filter((a) => selectedAdditionals.includes(a.key))
+			.map((a) => ({
+				id: a.key,
+				name: a.key,
+				price: a.price,
 			}));
 		const cartItem: Cart = {
 			productId,
@@ -116,11 +133,13 @@ export function ProductDialog({
 			tenantId,
 			quantity: 1,
 			base,
-			toppings,
+			addons: selectedProductAdditionals,
+			toppings: [...selectedToppings],
 			key: '',
 		};
 		// check same coposition is added or not is cart
 		const key = makeKey(cartItem);
+		console.log({key})
 		// Check whether an identical composition already exists in cart
 		let duplicateFound = false;
 		for (const pInCart of productsInCart) {
@@ -166,10 +185,19 @@ export function ProductDialog({
 	};
 	const makeKey = (cart: Cart) => {
 		const toppingIds = cart.toppings
-			.map((t) => t.id)
+			.map((t) => t.id) // This now includes both toppings and additionals
 			.sort()
 			.join(',');
-		return `${cart.productId}|${cart.base.name}|${toppingIds}`;
+
+		const additionalIds = cart.addons
+			.map((a) => a.id)
+			.sort()
+			.join(',');
+
+		const toppingKey = toppingIds ? `|${toppingIds}` : '';
+		const additionalKey = additionalIds ? `|${additionalIds}` : '';
+
+		return `${cart.productId}|${cart.base.name}${toppingKey}${additionalKey}`;
 	};
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
@@ -245,6 +273,57 @@ export function ProductDialog({
 										</Label>
 									))}
 								</RadioGroup>
+							</div>
+						)}
+
+						{/* Additionals */}
+						{additionals.length > 0 && (
+							<div className="space-y-2">
+								<p className="text-sm font-medium">Add Ons</p>
+								<div className="grid grid-cols-2 sm:grid-cols-3 gap-2 auto-rows-min">
+									{additionals.map((a) => (
+										<Label
+											key={a.key}
+											htmlFor={`additional-${a.key}`}
+											className={clsx(
+												'flex items-center justify-between rounded-md border px-3 py-2 cursor-pointer hover:bg-gray-50',
+												selectedAdditionals.includes(
+													a.key
+												)
+													? 'border-primary'
+													: 'border-gray-300'
+											)}
+										>
+											<Checkbox
+												id={`additional-${a.key}`}
+												checked={selectedAdditionals.includes(
+													a.key
+												)}
+												onCheckedChange={(checked) => {
+													setSelectedAdditionals(
+														(prev) =>
+															checked
+																? [...prev, a.key]
+																: prev.filter(
+																	(item) =>
+																		item !==
+																		a.key
+																)
+													);
+												}}
+												className="self-center"
+											/>
+											<div className="flex flex-col justify-center flex-grow gap-1 ml-2">
+												<span className="capitalize truncate">
+													{a.key}
+												</span>
+												<span className="text-sm text-gray-700">
+													{formatPrice(a.price)}
+												</span>
+											</div>
+										</Label>
+									))}
+								</div>
 							</div>
 						)}
 

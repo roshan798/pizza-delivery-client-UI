@@ -27,7 +27,8 @@ export function CartItem({ item, tenantId, itemIndex }: CartItemProps) {
 	const dispatch = useAppDispatch();
 
 	const toppingsTotal = item.toppings.reduce((sum, t) => sum + t.price, 0);
-	const itemUnitTotal = item.base.price + toppingsTotal;
+	const addOnsTotal = item.addons.reduce((sum, a) => sum + a.price, 0);
+	const itemUnitTotal = item.base.price + addOnsTotal + toppingsTotal;
 	const itemTotal = itemUnitTotal * item.quantity;
 
 	return (
@@ -54,6 +55,21 @@ export function CartItem({ item, tenantId, itemIndex }: CartItemProps) {
 					<p className="text-sm text-muted-foreground">
 						Size: {item.base.name}
 					</p>
+					{
+						item.addons && (
+							<div className="mt-2 flex flex-wrap gap-1 text-sm text-muted-foreground">
+								{item.addons.map((a) => (
+									<span
+										key={a.id}
+										className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800"
+									>
+										{a.name} (+{formatPrice(a.price)})
+									</span>
+								))
+								}
+							</div>
+						)
+					}
 					{item.toppings.length > 0 && (
 						<div className="mt-2 flex flex-wrap gap-1">
 							{item.toppings.map((t) => (

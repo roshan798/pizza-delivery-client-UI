@@ -1,7 +1,6 @@
 'use client';
 
 import { Card, CardContent } from '@/components/ui/card';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { setCart } from '@/lib/cart/cartSlices';
 import { useAppDispatch, useAppSelector } from '@/lib/hooks';

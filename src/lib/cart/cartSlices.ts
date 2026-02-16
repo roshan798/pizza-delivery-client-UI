@@ -12,6 +12,11 @@ export interface Cart {
 		name: string;
 		price: number;
 	};
+	addons: {
+		id: string;
+		name: string;
+		price: number;
+	}[];
 	toppings: {
 		id: string;
 		name: string;
@@ -199,18 +204,6 @@ export const selectItemsByTenant = createSelector(
 	}
 );
 
-// export const selectItemByProductId = createSelector(
-// 	[selectCartGroups, (_: RootState, productId: string) => productId],
-// 	(groups, productId) => {
-// 		for (const group of groups) {
-// 			const item = group.items.find(i => i.productId === productId);
-// 			if (item) {
-// 				return item;
-// 			}
-// 		}
-// 		return null;
-// 	}
-// );
 
 //
 export const makeSelectProductsByProductId = () =>
