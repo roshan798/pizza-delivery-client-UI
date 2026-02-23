@@ -23,6 +23,7 @@ type CheckoutSummaryProps = {
 	isPending: boolean;
 	itemsCount: number;
 };
+const TAX_RATE_PERCENT = 7; // For display purposes
 
 export function CheckoutSummary(props: CheckoutSummaryProps) {
 	// Props are now directly passed from CheckoutPage
@@ -67,7 +68,7 @@ export function CheckoutSummary(props: CheckoutSummaryProps) {
 				</div>
 
 				<div className="flex items-center justify-between text-sm">
-					<span className="text-muted-foreground">Tax (5%)</span>
+					<span className="text-muted-foreground">Tax ({TAX_RATE_PERCENT}%)</span>
 					<span className="font-medium">₹{formatPrice(tax)}</span>
 				</div>
 

@@ -22,7 +22,7 @@ interface CartSummaryProps {
 	tenantId?: string;
 	tenantName?: string;
 }
-
+const TAX_RATE_PERCENT = 7
 export function CartSummary({
 	itemsTotal,
 	delivery,
@@ -67,7 +67,7 @@ export function CartSummary({
 				</div>
 
 				<div className="flex items-center justify-between text-sm">
-					<span className="text-muted-foreground">Tax (5%)</span>
+					<span className="text-muted-foreground">Tax ({ TAX_RATE_PERCENT}%)</span>
 					<span className="font-medium">₹{formatPrice(tax)}</span>
 				</div>
 

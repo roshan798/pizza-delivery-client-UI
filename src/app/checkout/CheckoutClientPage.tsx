@@ -14,6 +14,8 @@ import { FormData as CheckoutFormData } from './useCheckoutForm';
 interface CheckoutClientPageProps {
 	tenantId: string;
 }
+const TAX_RATE = 0.07; // 7% tax
+const DELIVERY_CHARGE = 50.0; // flat delivery charge
 
 const CheckoutClientPage = ({ tenantId }: CheckoutClientPageProps) => {
 	const cartGroups = useAppSelector((state) => state.cart);
@@ -72,9 +74,9 @@ const CheckoutClientPage = ({ tenantId }: CheckoutClientPageProps) => {
 			(sum, item) => sum + item.quantity,
 			0
 		);
-		const delivery = tenantGroup.items.length ? 40 : 0;
+		const delivery = tenantGroup.items.length ? DELIVERY_CHARGE : 0;
 		const discount = 0;
-		const tax = Math.round((total - discount) * 0.05);
+		const tax = Math.round((total - discount) * TAX_RATE);
 		const grandTotal = total + delivery + tax - discount;
 
 		return { itemsTotal: total, grandTotal, itemsCount };
@@ -122,9 +124,9 @@ const CheckoutClientPage = ({ tenantId }: CheckoutClientPageProps) => {
 			phone: formData.phone,
 			paymentMode: formData.paymentMethod,
 			subTotal: itemsTotal,
-			tax: Math.round(itemsTotal * 0.05),
-			deliveryCharge: 40,
-			delivery: 40,
+			tax: Math.round(itemsTotal * TAX_RATE),
+			deliveryCharge: DELIVERY_CHARGE,
+			delivery: DELIVERY_CHARGE,
 			discount: 0,
 			grandTotal: grandTotal,
 			couponCode: formData.couponCode || '',
@@ -206,8 +208,8 @@ const CheckoutClientPage = ({ tenantId }: CheckoutClientPageProps) => {
 			{/* Right: Order Summary */}
 			<CheckoutSummary
 				itemsTotal={itemsTotal}
-				delivery={40}
-				tax={Math.round(itemsTotal * 0.05)}
+				delivery={DELIVERY_CHARGE}
+				tax={Math.round(itemsTotal * TAX_RATE)}
 				discount={0}
 				grandTotal={grandTotal}
 				itemsCount={itemsCount}

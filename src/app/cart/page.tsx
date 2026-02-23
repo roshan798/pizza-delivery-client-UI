@@ -13,7 +13,8 @@ import { TenantSummary } from '@/types/cart'; // Import new types
 import { CartHeader } from './CartHeader'; // Import new component
 import { CartGroupItem } from './CartGroupItem'; // Import new component
 import { CartSummarySection } from './CartSummarySection'; // Import new component
-
+const TAX_RATE = 0.07; // 7% tax
+const DELIVERY_CHARGE = 50.0; // flat delivery charge
 const CartPage = () => {
 	const [isLoadedFromLocalStorage, setIsLoadedFromLocalStorage] =
 		useState(false);
@@ -49,8 +50,8 @@ const CartPage = () => {
 					(sum, item) => sum + item.quantity,
 					0
 				);
-				const delivery = group.items.length ? 40 : 0;
-				const tax = Math.round(itemsTotal * 0.05);
+				const delivery = group.items.length ? DELIVERY_CHARGE : 0;
+				const tax = Math.round(itemsTotal * TAX_RATE);
 				const grandTotal = itemsTotal + delivery + tax;
 
 				return {
